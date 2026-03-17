@@ -1,20 +1,22 @@
 package com.example.wardrobeai.data;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class ClothingItem {
     private String id;
     private String name;
-    private String color;
+    private List<String> colors;
     private Category category;
     private Style style;
     private Season[] seasons;
     private Occasion[] occasions;
 
-    public ClothingItem(String name, String color, Category category, Style style, Season[] seasons, Occasion[] occasions){
+    public ClothingItem(String name, List<String> colors, Category category, Style style, Season[] seasons, Occasion[] occasions){
         this.id = java.util.UUID.randomUUID().toString();
         this.name = name;
-        this.color = color;
+        this.colors = colors;
         this.category = category;
         this.style = style;
         this.seasons = seasons;
@@ -26,7 +28,7 @@ public class ClothingItem {
         return "ClothingItem{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", color='" + color + '\'' +
+                ", colors='" + colors + '\'' +
                 ", category=" + category +
                 ", style=" + style +
                 ", seasons=" + Arrays.toString(seasons) +
@@ -42,8 +44,8 @@ public class ClothingItem {
         return name;
     }
 
-    public String getColor() {
-        return color;
+    public List<String> getColors() {
+        return colors;
     }
 
     public Category getCategory() {
