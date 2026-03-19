@@ -107,6 +107,11 @@ public class AddItemActivity extends AppCompatActivity {
             Style style = (Style) spinnerStyle.getSelectedItem();
             ClothingItem item = new ClothingItem(name, selectedColors, category, style, selectedSeasons, selectedOccasions);
             WardrobeRepository.getInstance().addItem(item);
+            if (name.trim().isEmpty()) {
+                editTextItemName.setError("Name required");
+                return;
+            }
+            setResult(RESULT_OK);
             finish();
         });
     }

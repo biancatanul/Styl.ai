@@ -24,6 +24,8 @@ public class WardrobeActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private Button buttonAddItem;
     private WardrobeAdapter adapter;
+    private Button buttonBuildOutfit;
+    private Button buttonViewOutfits;
 
     ActivityResultLauncher<Intent> addItemLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -40,6 +42,8 @@ public class WardrobeActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerViewWardrobe);
         buttonAddItem = findViewById(R.id.buttonAddItem);
+        buttonBuildOutfit = findViewById(R.id.buttonBuildOutfit);
+        buttonViewOutfits = findViewById(R.id.buttonViewOutfits);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         List<ClothingItem> items = WardrobeRepository.getInstance().getAllItems();
@@ -50,7 +54,17 @@ public class WardrobeActivity extends AppCompatActivity {
             Intent intent = new Intent(this, AddItemActivity.class);
             addItemLauncher.launch(intent);
         });
-    }
+
+        buttonBuildOutfit.setOnClickListener(v -> {
+            Intent intent = new Intent(this, BuildOutfitActivity.class);
+            startActivity(intent);
+        });
+
+        buttonViewOutfits.setOnClickListener(v -> {
+            Intent intent = new Intent(this, OutfitsActivity.class);
+            startActivity(intent);
+        });
+        }
     @Override
     protected void onResume(){
         super.onResume();

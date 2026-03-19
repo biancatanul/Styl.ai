@@ -17,4 +17,16 @@
         android:layout_height="wrap_content"
         android:text="Add Item" />
 
+    <Button
+        android:id="@+id/buttonBuildOutfit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Make new outfit"/>
+
+    <Button
+        android:id="@+id/buttonViewOutfits"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View outfits"/>
+
 </LinearLayout>
