@@ -41,6 +41,9 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
             }
             holder.colorSwatchContainer.addView(swatch);
         }
+        ClothingItem item = items.get(position);
+        holder.textName.setText(item.getName());
+        holder.textDetails.setText(item.getCategory() + " · " + item.getStyle());
     }
 
     @Override

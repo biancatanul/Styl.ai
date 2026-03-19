@@ -10,10 +10,10 @@ public class ClothingItem {
     private List<String> colors;
     private Category category;
     private Style style;
-    private Season[] seasons;
-    private Occasion[] occasions;
+    private List<String> seasons;
+    private List<String> occasions;
 
-    public ClothingItem(String name, List<String> colors, Category category, Style style, Season[] seasons, Occasion[] occasions){
+    public ClothingItem(String name, List<String> colors, Category category, Style style, List<String> seasons, List<String> occasions){
         this.id = java.util.UUID.randomUUID().toString();
         this.name = name;
         this.colors = colors;
@@ -31,8 +31,8 @@ public class ClothingItem {
                 ", colors='" + colors + '\'' +
                 ", category=" + category +
                 ", style=" + style +
-                ", seasons=" + Arrays.toString(seasons) +
-                ", occasions=" + Arrays.toString(occasions) +
+                ", seasons=" + seasons +
+                ", occasions=" + occasions +
                 '}';
     }
 
@@ -56,25 +56,19 @@ public class ClothingItem {
         return style;
     }
 
-    public Season[] getSeasons() {
+    public List<String> getSeasons() {
         return seasons;
     }
 
-    public Occasion[] getOccasions() {
+    public List<String> getOccasions() {
         return occasions;
     }
 
     public boolean hasOccasion(Occasion occasion) {
-        for (Occasion o : occasions) {
-            if (o == occasion) return true;
-        }
-        return false;
+        return occasions.contains(occasion.name());
     }
 
     public boolean hasSeason(Season season) {
-        for (Season s : seasons) {
-            if (s == season) return true;
-        }
-        return false;
+        return seasons.contains(season.name());
     }
 }

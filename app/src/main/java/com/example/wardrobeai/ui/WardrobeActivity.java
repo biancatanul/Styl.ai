@@ -3,6 +3,8 @@ package com.example.wardrobeai.ui;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -23,6 +25,14 @@ public class WardrobeActivity extends AppCompatActivity {
     private Button buttonAddItem;
     private WardrobeAdapter adapter;
 
+    ActivityResultLauncher<Intent> addItemLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    adapter.notifyDataSetChanged();
+                }
+            }
+    );
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,9 +48,8 @@ public class WardrobeActivity extends AppCompatActivity {
 
         buttonAddItem.setOnClickListener(v -> {
             Intent intent = new Intent(this, AddItemActivity.class);
-            startActivity(intent);
+            addItemLauncher.launch(intent);
         });
-
     }
     @Override
     protected void onResume(){
