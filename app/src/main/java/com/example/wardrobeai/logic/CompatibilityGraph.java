@@ -1,4 +1,6 @@
-package com.example.wardrobeai.data;
+package com.example.wardrobeai.logic;
+
+import com.example.wardrobeai.data.ClothingItem;
 
 import java.util.*;
 

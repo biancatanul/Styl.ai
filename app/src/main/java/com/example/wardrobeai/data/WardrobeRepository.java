@@ -2,6 +2,8 @@ package com.example.wardrobeai.data;
 
 import static com.example.wardrobeai.data.ClothingColor.*;
 
+import com.example.wardrobeai.logic.CompatibilityGraph;
+
 import java.util.ArrayList;
 import java.util.List;
 
