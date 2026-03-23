@@ -1,5 +1,7 @@
 package com.example.wardrobeai.data;
 
+import static com.example.wardrobeai.data.ClothingColor.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +14,7 @@ public class WardrobeRepository {
         }
         return instance;
     }
+
     private List<ClothingItem> items;
     private List<Outfit> outfits;
 
@@ -19,6 +22,7 @@ public class WardrobeRepository {
         items = new ArrayList<>();
         outfits = new ArrayList<>();
     }
+
     public void addItem(ClothingItem item) {
         items.add(item);
     }
@@ -45,6 +49,7 @@ public class WardrobeRepository {
             }
         }
     }
+
     public void addOutfit(Outfit outfit) {
         outfits.add(outfit);
     }
@@ -60,5 +65,31 @@ public class WardrobeRepository {
 
     public List<Outfit> getAllOutfits() {
         return outfits;
+    }
+
+    public boolean isNeutral(ClothingItem item) {
+        return item.getColors().contains(WHITE.getHex()) || item.getColors().contains(BLACK.getHex()) || item.getColors().contains(GRAY.getHex());
+    }
+
+    public CompatibilityGraph buildCompatibilityGraph() {
+        CompatibilityGraph graph = new CompatibilityGraph();
+        for (ClothingItem item : items) {
+            graph.addItem(item);
+        }
+        for (int i = 0; i < items.size(); i++) {
+            for (int j = i + 1; j < items.size(); j++) {
+                ClothingItem item1 = items.get(i);
+                ClothingItem item2 = items.get(j);
+
+                if (item1.getStyle() == item2.getStyle()) {
+                    graph.addEdge(item1, item2);
+                }
+
+                if (isNeutral(item1) || isNeutral(item2)) {
+                    graph.addEdge(item1, item2);
+                }
+            }
+        }
+        return graph;
     }
 }
