@@ -8,10 +8,10 @@ public class CSPSolver {
     private List<ClothingItem> items;
     private CompatibilityGraph graph;
 
-    private List<ClothingItem> getItemsForSlot(Category category, Season season, Occasion occasion){
+    private List<ClothingItem> getItemsForSlot(Style style, Category category, Season season, Occasion occasion){
         List<ClothingItem> result = new ArrayList<>();
         for (ClothingItem item : items) {
-            if (item.getCategory() == category && item.hasSeason(season) && item.hasOccasion(occasion))
+            if (item.getCategory() == category && item.hasSeason(season) && item.hasOccasion(occasion) && item.getStyle() == style)
                 result.add(item);
         }
         return result;
@@ -22,11 +22,11 @@ public class CSPSolver {
         this.graph = graph;
     }
 
-    public List<Outfit> suggestOutfits(String style, Season season, Occasion occasion, int count) {
-        List<ClothingItem> tops = getItemsForSlot(Category.TOP, season, occasion);
-        List<ClothingItem> bottoms = getItemsForSlot(Category.BOTTOM, season, occasion);
-        List<ClothingItem> shoes = getItemsForSlot(Category.SHOES, season, occasion);
-        List<ClothingItem> accessories = getItemsForSlot(Category.ACCESSORY, season, occasion);
+    public List<Outfit> suggestOutfits(Style style, Season season, Occasion occasion, int count) {
+        List<ClothingItem> tops = getItemsForSlot(style, Category.TOP, season, occasion);
+        List<ClothingItem> bottoms = getItemsForSlot(style, Category.BOTTOM, season, occasion);
+        List<ClothingItem> shoes = getItemsForSlot(style, Category.SHOES, season, occasion);
+        List<ClothingItem> accessories = getItemsForSlot(style, Category.ACCESSORY, season, occasion);
         List<Outfit> outfits = new ArrayList<>();
 
         for(ClothingItem top : tops) {
