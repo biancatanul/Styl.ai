@@ -8,6 +8,7 @@ import android.widget.*;
 
 import com.example.wardrobeai.R;
 import com.example.wardrobeai.data.*;
+import com.example.wardrobeai.logic.BinomialHeap;
 import com.example.wardrobeai.logic.CSPSolver;
 import com.example.wardrobeai.logic.CompatibilityGraph;
 
@@ -65,14 +66,18 @@ public class AiActivity extends AppCompatActivity {
         styleSpinner.setAdapter(adapter3);
 
         suggestButton.setOnClickListener(v -> {
-            Occasion occasion = (Occasion) occasionSpinner.getSelectedItem();
-            Season season = (Season) seasonSpinner.getSelectedItem();
-            Style style = (Style) styleSpinner.getSelectedItem();
+            selectedOccasion = (Occasion) occasionSpinner.getSelectedItem();
+            selectedSeason = (Season) seasonSpinner.getSelectedItem();
+            selectedStyle = (Style) styleSpinner.getSelectedItem();
+
             CSPSolver solver = new CSPSolver(repo.getAllItems(), graph);
-            suggestions = solver.suggestOutfits(selectedStyle, selectedSeason, selectedOccasion, 5);
-            if (suggestions.isEmpty()) {
+            List<Outfit> candidates = solver.suggestOutfits(selectedStyle, selectedSeason, selectedOccasion, 10);
+
+            if (candidates.isEmpty()) {
                 Toast.makeText(AiActivity.this, "No outfits found", Toast.LENGTH_SHORT).show();
             } else {
+                BinomialHeap heap = BinomialHeap.fromOutfits(candidates, graph);
+                suggestions = heap.drainSorted();
                 currentIndex = 0;
                 resultsLayout.setVisibility(View.VISIBLE);
                 displayOutfit();
