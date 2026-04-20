@@ -301,4 +301,27 @@ public class RedBlackTree {
             collectSnapshots(n.right, depth + 1, list);
         }
     }
+
+    public static class VisNode {
+        public final ClothingItem item;
+        public final boolean isRed;
+        public final VisNode left;
+        public final VisNode right;
+
+        VisNode(ClothingItem item, boolean isRed, VisNode left, VisNode right) {
+            this.item = item;
+            this.isRed = isRed;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    public VisNode getVisTree() {
+        return buildVisNode(root);
+    }
+
+    private VisNode buildVisNode(Node n) {
+        if (isNil(n)) return null;
+        return new VisNode(n.item, n.color == RED, buildVisNode(n.left), buildVisNode(n.right));
+    }
 }

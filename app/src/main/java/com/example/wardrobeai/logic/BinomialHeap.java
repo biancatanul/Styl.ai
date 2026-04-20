@@ -33,6 +33,8 @@ public class BinomialHeap {
             this.child = null;
             this.sibling = null;
         }
+        public Node getSibling() { return sibling; }
+        public Node getChild() { return child; }
     }
 
     // ── Fields ────────────────────────────────────────────────────────────────
@@ -256,6 +258,13 @@ public class BinomialHeap {
     private void collectTree(Node n, List<NodeSnapshot> list) {
         if (n == null) return;
         list.add(new NodeSnapshot(n.outfit.getName(), n.score, n.degree, n.child != null, n.sibling != null));
-        collectTree(n.child, list);
+        Node child = n.child;
+        while (child != null) {
+            collectTree(child, list);
+            child = child.sibling;
+        }
+    }
+    public Node getHead() {
+        return head;
     }
 }

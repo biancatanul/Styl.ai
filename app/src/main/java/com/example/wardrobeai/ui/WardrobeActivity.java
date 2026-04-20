@@ -2,20 +2,19 @@ package com.example.wardrobeai.ui;
 
 import android.os.Bundle;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
 import android.content.Intent;
 import android.widget.Button;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.wardrobeai.R;
-import com.example.wardrobeai.data.ClothingItem;
-import com.example.wardrobeai.data.WardrobeRepository;
+import com.example.wardrobeai.data.*;
+import com.example.wardrobeai.logic.*;
+import com.example.wardrobeai.ui.*;
+
 import java.util.List;
 
 
@@ -27,6 +26,7 @@ public class WardrobeActivity extends AppCompatActivity {
     private Button buttonBuildOutfit;
     private Button buttonViewOutfits;
     private Button buttonAiSuggest;
+    private Button buttonDataStructures;
 
     ActivityResultLauncher<Intent> addItemLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -46,6 +46,7 @@ public class WardrobeActivity extends AppCompatActivity {
         buttonBuildOutfit = findViewById(R.id.buttonBuildOutfit);
         buttonViewOutfits = findViewById(R.id.buttonViewOutfits);
         buttonAiSuggest = findViewById(R.id.buttonAiSuggest);
+        buttonDataStructures = findViewById(R.id.buttonDataStructures);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         List<ClothingItem> items = WardrobeRepository.getInstance().getAllItems();
@@ -69,6 +70,11 @@ public class WardrobeActivity extends AppCompatActivity {
 
         buttonAiSuggest.setOnClickListener(v -> {
             Intent intent = new Intent(this, AiActivity.class);
+            startActivity(intent);
+        });
+
+        buttonDataStructures.setOnClickListener(v -> {
+            Intent intent = new Intent(this, DataStructuresActivity.class);
             startActivity(intent);
         });
         }

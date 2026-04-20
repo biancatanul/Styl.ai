@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:allowBackup="true"
@@ -10,13 +10,16 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.WardrobeAi" >
+        android:theme="@style/Theme.WardrobeAi">
+        <activity
+            android:name=".ui.DataStructuresActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.AiActivity"
             android:exported="false" />
         <activity
             android:name=".ui.WardrobeActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,21 +28,21 @@
         </activity>
         <activity
             android:name=".ui.AddItemActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ADD_ITEM" />
             </intent-filter>
         </activity>
         <activity
             android:name=".ui.BuildOutfitActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BUILD_OUTFIT" />
             </intent-filter>
         </activity>
         <activity
             android:name=".ui.OutfitsActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW_OUTFITS" />
             </intent-filter>

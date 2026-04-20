@@ -26,4 +26,8 @@ public class CompatibilityGraph {
     }
     public List<String> getCompatibleItems(ClothingItem item){
         return adjacencyList.getOrDefault(item.getId(), new ArrayList<>());    }
+
+    public Map<String, List<String>> getAdjacencyList() {
+        return adjacencyList;
+    }
 }
