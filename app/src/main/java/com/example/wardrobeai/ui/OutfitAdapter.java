@@ -53,7 +53,14 @@ public class OutfitAdapter extends RecyclerView.Adapter<OutfitAdapter.OutfitView
             popup.getMenu().add(0, 1, 1, "Delete");
             popup.setOnMenuItemClickListener(menuItem -> {
                 if (menuItem.getItemId() == 0) listener.onEdit(outfit);
-                else listener.onDelete(outfit);
+                else {
+                    new androidx.appcompat.app.AlertDialog.Builder(v.getContext())
+                            .setTitle("Delete outfit")
+                            .setMessage("Are you sure you want to delete \"" + outfit.getName() + "\"?")
+                            .setPositiveButton("Delete", (d, w) -> listener.onDelete(outfit))
+                            .setNegativeButton("Cancel", null)
+                            .show();
+                }
                 return true;
             });
             popup.show();

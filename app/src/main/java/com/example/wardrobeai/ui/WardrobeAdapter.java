@@ -22,6 +22,7 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
     private final List<ClothingItem> allItems;
     private final ItemMenuListener listener;
     private List<ClothingItem> filteredItems;
+
     public WardrobeAdapter(List<ClothingItem> items, ItemMenuListener listener) {
         this.allItems = items;
         this.filteredItems = new ArrayList<>(items);
@@ -102,7 +103,14 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
             popup.getMenu().add(0, 1, 1, "Delete");
             popup.setOnMenuItemClickListener(menuItem -> {
                 if (menuItem.getItemId() == 0) listener.onEdit(item);
-                else listener.onDelete(item);
+                else {
+                    new androidx.appcompat.app.AlertDialog.Builder(v.getContext())
+                            .setTitle("Delete item")
+                            .setMessage("Are you sure you want to delete \"" + item.getName() + "\"?")
+                            .setPositiveButton("Delete", (d, w) -> listener.onDelete(item))
+                            .setNegativeButton("Cancel", null)
+                            .show();
+                }
                 return true;
             });
             popup.show();
