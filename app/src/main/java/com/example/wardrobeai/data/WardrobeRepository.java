@@ -9,20 +9,19 @@ import java.util.List;
 
 public class WardrobeRepository {
     private static WardrobeRepository instance;
+    private List<ClothingItem> items;
+    private List<Outfit> outfits;
+    private WardrobeRepository() {
+        items = new ArrayList<>();
+        outfits = new ArrayList<>();
+        seedData();
+    }
 
     public static WardrobeRepository getInstance() {
         if (instance == null) {
             instance = new WardrobeRepository();
         }
         return instance;
-    }
-
-    private List<ClothingItem> items;
-    private List<Outfit> outfits;
-
-    private WardrobeRepository() {
-        items = new ArrayList<>();
-        outfits = new ArrayList<>();
     }
 
     public void addItem(ClothingItem item) {
@@ -93,5 +92,55 @@ public class WardrobeRepository {
             }
         }
         return graph;
+    }
+
+    private void seedData() {
+        addItem(new ClothingItem("White Shirt",
+                List.of(ClothingColor.WHITE.getHex()),
+                Category.TOP, Style.FORMAL,
+                List.of(Season.SPRING.name(), Season.SUMMER.name(), Season.AUTUMN.name()),
+                List.of(Occasion.WORK.name(), Occasion.EVENT.name())));
+
+        addItem(new ClothingItem("Black Trousers",
+                List.of(ClothingColor.BLACK.getHex()),
+                Category.BOTTOM, Style.FORMAL,
+                List.of(Season.AUTUMN.name(), Season.WINTER.name(), Season.SPRING.name()),
+                List.of(Occasion.WORK.name(), Occasion.EVENT.name())));
+
+        addItem(new ClothingItem("Black Heels",
+                List.of(ClothingColor.BLACK.getHex()),
+                Category.SHOES, Style.FORMAL,
+                List.of(Season.SPRING.name(), Season.AUTUMN.name()),
+                List.of(Occasion.WORK.name(), Occasion.EVENT.name())));
+
+        addItem(new ClothingItem("Silver Necklace",
+                List.of(ClothingColor.GRAY.getHex()),
+                Category.ACCESSORY, Style.FORMAL,
+                List.of(Season.SPRING.name(), Season.SUMMER.name(), Season.AUTUMN.name(), Season.WINTER.name()),
+                List.of(Occasion.WORK.name(), Occasion.EVENT.name(), Occasion.DATE.name())));
+
+        addItem(new ClothingItem("Blue Jeans",
+                List.of(ClothingColor.BLUE.getHex()),
+                Category.BOTTOM, Style.CASUAL,
+                List.of(Season.SPRING.name(), Season.AUTUMN.name(), Season.WINTER.name()),
+                List.of(Occasion.CASUAL.name(), Occasion.OUTDOOR.name())));
+
+        addItem(new ClothingItem("White Sneakers",
+                List.of(ClothingColor.WHITE.getHex()),
+                Category.SHOES, Style.CASUAL,
+                List.of(Season.SPRING.name(), Season.SUMMER.name(), Season.AUTUMN.name()),
+                List.of(Occasion.CASUAL.name(), Occasion.OUTDOOR.name())));
+
+        addItem(new ClothingItem("Grey Hoodie",
+                List.of(ClothingColor.GRAY.getHex()),
+                Category.TOP, Style.CASUAL,
+                List.of(Season.AUTUMN.name(), Season.WINTER.name()),
+                List.of(Occasion.CASUAL.name(), Occasion.OUTDOOR.name())));
+
+        addItem(new ClothingItem("Black Cap",
+                List.of(ClothingColor.BLACK.getHex()),
+                Category.ACCESSORY, Style.CASUAL,
+                List.of(Season.SPRING.name(), Season.SUMMER.name(), Season.AUTUMN.name()),
+                List.of(Occasion.CASUAL.name(), Occasion.OUTDOOR.name())));
     }
 }

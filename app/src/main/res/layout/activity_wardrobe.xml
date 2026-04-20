@@ -24,6 +24,12 @@
         android:text="Make new outfit"/>
 
     <Button
+        android:id="@+id/buttonAiSuggest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="AI Outfit Suggestion" />
+
+    <Button
         android:id="@+id/buttonViewOutfits"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -26,6 +26,7 @@ public class WardrobeActivity extends AppCompatActivity {
     private WardrobeAdapter adapter;
     private Button buttonBuildOutfit;
     private Button buttonViewOutfits;
+    private Button buttonAiSuggest;
 
     ActivityResultLauncher<Intent> addItemLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -44,6 +45,7 @@ public class WardrobeActivity extends AppCompatActivity {
         buttonAddItem = findViewById(R.id.buttonAddItem);
         buttonBuildOutfit = findViewById(R.id.buttonBuildOutfit);
         buttonViewOutfits = findViewById(R.id.buttonViewOutfits);
+        buttonAiSuggest = findViewById(R.id.buttonAiSuggest);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         List<ClothingItem> items = WardrobeRepository.getInstance().getAllItems();
@@ -62,6 +64,11 @@ public class WardrobeActivity extends AppCompatActivity {
 
         buttonViewOutfits.setOnClickListener(v -> {
             Intent intent = new Intent(this, OutfitsActivity.class);
+            startActivity(intent);
+        });
+
+        buttonAiSuggest.setOnClickListener(v -> {
+            Intent intent = new Intent(this, AiActivity.class);
             startActivity(intent);
         });
         }

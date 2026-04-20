@@ -117,11 +117,13 @@ public class AiActivity extends AppCompatActivity {
     private String generateReasoning(ClothingItem item) {
         StringBuilder reasoning = new StringBuilder();
         if (item.hasSeason(selectedSeason))
-            reasoning.append("matches season: ").append(selectedSeason.name()).append(") ");
+            reasoning.append("(matches season: ").append(selectedSeason.name()).append(") ");
         if (item.hasOccasion(selectedOccasion))
-            reasoning.append("matches occasion: ").append(selectedOccasion.name()).append(") ");
+            reasoning.append("(matches occasion: ").append(selectedOccasion.name()).append(") ");
         if (item.getStyle() == selectedStyle)
-            reasoning.append("matches style: ").append(selectedStyle.name()).append(") ");
+            reasoning.append("(matches style: ").append(selectedStyle.name()).append(") ");
+        if (repo.isNeutral(item))
+            reasoning.append("(neutral color: goes with anything) ");
         return reasoning.toString().trim();
     }
 }
