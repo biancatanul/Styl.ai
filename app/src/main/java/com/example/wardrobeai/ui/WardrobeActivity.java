@@ -8,8 +8,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.widget.Button;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.wardrobeai.R;
 import com.example.wardrobeai.data.*;
 import com.example.wardrobeai.logic.*;
@@ -23,11 +25,6 @@ public class WardrobeActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private Button buttonAddItem;
     private WardrobeAdapter adapter;
-    private Button buttonBuildOutfit;
-    private Button buttonViewOutfits;
-    private Button buttonAiSuggest;
-    private Button buttonDataStructures;
-
     ActivityResultLauncher<Intent> addItemLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -36,6 +33,11 @@ public class WardrobeActivity extends AppCompatActivity {
                 }
             }
     );
+    private Button buttonBuildOutfit;
+    private Button buttonViewOutfits;
+    private Button buttonAiSuggest;
+    private Button buttonDataStructures;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +52,20 @@ public class WardrobeActivity extends AppCompatActivity {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         List<ClothingItem> items = WardrobeRepository.getInstance().getAllItems();
-        adapter = new WardrobeAdapter(items);
+        adapter = new WardrobeAdapter(items, new WardrobeAdapter.ItemMenuListener() {
+            @Override
+            public void onEdit(ClothingItem item) {
+                Intent intent = new Intent(WardrobeActivity.this, AddItemActivity.class);
+                intent.putExtra("edit_item_id", item.getId());
+                addItemLauncher.launch(intent);
+            }
+
+            @Override
+            public void onDelete(ClothingItem item) {
+                WardrobeRepository.getInstance().removeItem(item.getId());
+                adapter.notifyDataSetChanged();
+            }
+        });
         recyclerView.setAdapter(adapter);
 
         buttonAddItem.setOnClickListener(v -> {
@@ -77,9 +92,10 @@ public class WardrobeActivity extends AppCompatActivity {
             Intent intent = new Intent(this, DataStructuresActivity.class);
             startActivity(intent);
         });
-        }
+    }
+
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
         adapter.notifyDataSetChanged();
     }

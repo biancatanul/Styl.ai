@@ -143,4 +143,20 @@ public class WardrobeRepository {
                 List.of(Season.SPRING.name(), Season.SUMMER.name(), Season.AUTUMN.name()),
                 List.of(Occasion.CASUAL.name(), Occasion.OUTDOOR.name())));
     }
+    public ClothingItem getItemById(String id) {
+        for (ClothingItem item : items) {
+            if (item.getId().equals(id)) return item;
+        }
+        return null;
+    }
+
+    public void updateItem(String id, ClothingItem updated) {
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).getId().equals(id)) {
+                items.set(i, updated);
+                return;
+            }
+        }
+    }
+
 }

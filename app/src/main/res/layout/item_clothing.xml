@@ -5,17 +5,20 @@
     android:orientation="horizontal"
     android:padding="12dp"
     android:background="@android:color/white"
-    android:layout_marginBottom="8dp">
+    android:layout_marginBottom="8dp"
+    android:gravity="center_vertical">
 
     <LinearLayout
         android:id="@+id/colorSwatchContainer"
         android:layout_width="wrap_content"
         android:layout_height="24dp"
-        android:orientation="horizontal" />
+        android:orientation="horizontal"
+        android:layout_marginEnd="8dp"/>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <TextView
@@ -24,15 +27,23 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/textItemDetails"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="13sp"
-            android:textColor="@android:color/darker_gray" />
+            android:textColor="@android:color/darker_gray"/>
 
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/buttonItemMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_more"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="More options"/>
 
 </LinearLayout>
