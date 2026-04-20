@@ -1,6 +1,9 @@
 package com.example.wardrobeai.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,6 +14,16 @@ import java.util.List;
 
 public class OutfitsActivity extends AppCompatActivity {
 
+    private OutfitAdapter adapter;
+
+    ActivityResultLauncher<Intent> editOutfitLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK)
+                    adapter.notifyDataSetChanged();
+            }
+    );
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,6 +32,28 @@ public class OutfitsActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recyclerViewOutfits);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         List<Outfit> outfits = WardrobeRepository.getInstance().getAllOutfits();
-        recyclerView.setAdapter(new OutfitAdapter(outfits));
+
+        adapter = new OutfitAdapter(outfits, new OutfitAdapter.OutfitMenuListener() {
+            @Override
+            public void onEdit(Outfit outfit) {
+                Intent intent = new Intent(OutfitsActivity.this, BuildOutfitActivity.class);
+                intent.putExtra("edit_outfit_id", outfit.getId());
+                editOutfitLauncher.launch(intent);
+            }
+
+            @Override
+            public void onDelete(Outfit outfit) {
+                WardrobeRepository.getInstance().removeOutfit(outfit.getId());
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+        recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adapter.notifyDataSetChanged();
     }
 }

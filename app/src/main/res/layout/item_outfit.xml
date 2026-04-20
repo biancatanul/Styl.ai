@@ -24,4 +24,11 @@
         android:text="AI Generated"
         android:visibility="gone"/>
 
+    <ImageButton
+        android:id="@+id/buttonOutfitMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_more"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="More options"/>
 </LinearLayout>

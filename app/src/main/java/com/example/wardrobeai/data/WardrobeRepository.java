@@ -159,4 +159,20 @@ public class WardrobeRepository {
         }
     }
 
+    public Outfit getOutfitById(String id) {
+        for (Outfit outfit : outfits) {
+            if (outfit.getId().equals(id)) return outfit;
+        }
+        return null;
+    }
+
+    public void updateOutfit(String id, Outfit updated) {
+        for (int i = 0; i < outfits.size(); i++) {
+            if (outfits.get(i).getId().equals(id)) {
+                outfits.set(i, updated);
+                return;
+            }
+        }
+    }
+
 }
