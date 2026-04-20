@@ -8,24 +8,64 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.wardrobeai.R;
-import com.example.wardrobeai.data.ClothingItem;
+import com.example.wardrobeai.data.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHolder> {
 
-    public interface ItemMenuListener {
-        void onEdit(ClothingItem item);
-        void onDelete(ClothingItem item);
+    private final List<ClothingItem> allItems;
+    private final ItemMenuListener listener;
+    private List<ClothingItem> filteredItems;
+    public WardrobeAdapter(List<ClothingItem> items, ItemMenuListener listener) {
+        this.allItems = items;
+        this.filteredItems = new ArrayList<>(items);
+        this.listener = listener;
     }
 
-    private final List<ClothingItem> items;
-    private final ItemMenuListener listener;
-
-    public WardrobeAdapter(List<ClothingItem> items, ItemMenuListener listener) {
-        this.items = items;
-        this.listener = listener;
+    public void applyFilters(String query, List<Category> categories, List<Style> styles,
+                             List<Season> seasons, List<Occasion> occasions, List<String> colorHexes) {
+        filteredItems = new ArrayList<>();
+        for (ClothingItem item : allItems) {
+            if (!query.isEmpty() &&
+                    !item.getName().toLowerCase().contains(query.toLowerCase())) continue;
+            if (!categories.isEmpty() && !categories.contains(item.getCategory())) continue;
+            if (!styles.isEmpty() && !styles.contains(item.getStyle())) continue;
+            if (!seasons.isEmpty()) {
+                boolean match = false;
+                for (Season s : seasons)
+                    if (item.hasSeason(s)) {
+                        match = true;
+                        break;
+                    }
+                if (!match) continue;
+            }
+            if (!occasions.isEmpty()) {
+                boolean match = false;
+                for (Occasion o : occasions)
+                    if (item.hasOccasion(o)) {
+                        match = true;
+                        break;
+                    }
+                if (!match) continue;
+            }
+            if (!colorHexes.isEmpty()) {
+                boolean match = false;
+                for (String hex : colorHexes)
+                    if (item.getColors().contains(hex)) {
+                        match = true;
+                        break;
+                    }
+                if (!match) continue;
+            }
+            filteredItems.add(item);
+        }
+        notifyDataSetChanged();
     }
 
     @Override
@@ -37,7 +77,7 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        ClothingItem item = items.get(position);
+        ClothingItem item = filteredItems.get(position);
 
         holder.colorSwatchContainer.removeAllViews();
         for (String hex : item.getColors()) {
@@ -71,7 +111,13 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return filteredItems.size();
+    }
+
+    public interface ItemMenuListener {
+        void onEdit(ClothingItem item);
+
+        void onDelete(ClothingItem item);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

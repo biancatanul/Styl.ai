@@ -5,17 +5,42 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <EditText
+            android:id="@+id/editTextSearch"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Search items..."
+            android:inputType="text"
+            android:layout_marginEnd="8dp"/>
+
+        <ImageButton
+            android:id="@+id/buttonFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_sort_by_size"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Filter"/>
+
+    </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewWardrobe"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"/>
 
     <Button
         android:id="@+id/buttonAddItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Item" />
+        android:text="Add Item"/>
 
     <Button
         android:id="@+id/buttonBuildOutfit"
@@ -27,7 +52,7 @@
         android:id="@+id/buttonAiSuggest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="AI Outfit Suggestion" />
+        android:text="AI Outfit Suggestion"/>
 
     <Button
         android:id="@+id/buttonViewOutfits"
