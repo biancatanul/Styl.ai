@@ -1,69 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@color/pink_bg">
 
+    <!-- Top bar -->
     <LinearLayout
+        android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="8dp">
+        android:orientation="vertical"
+        android:background="@color/nav_bar"
+        android:elevation="4dp">
 
-        <EditText
-            android:id="@+id/editTextSearch"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="Search items..."
-            android:inputType="text"
-            android:layout_marginEnd="8dp"/>
-
-        <ImageButton
-            android:id="@+id/buttonFilter"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_sort_by_size"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Filter"/>
+            android:text="styl.AI"
+            android:textSize="24sp"
+            android:textStyle="bold|italic"
+            android:textColor="@color/text_dark"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"/>
+
+        <!-- Search + filter + toggle row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="12dp"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                app:boxCornerRadiusTopStart="28dp"
+                app:boxCornerRadiusTopEnd="28dp"
+                app:boxCornerRadiusBottomStart="28dp"
+                app:boxCornerRadiusBottomEnd="28dp"
+                app:boxBackgroundColor="@color/surface_white"
+                app:startIconDrawable="@android:drawable/ic_menu_search"
+                app:startIconTint="@color/text_hint"
+                app:hintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editTextSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="Search items..."
+                    android:textColorHint="@color/text_hint"
+                    android:textColor="@color/text_dark"
+                    android:textSize="14sp"
+                    android:inputType="text"
+                    android:paddingVertical="0dp"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Filter button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonFilter"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginEnd="6dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
+                android:padding="0dp"
+                app:icon="@android:drawable/ic_menu_sort_by_size"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="20dp"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:contentDescription="Filter"/>
+
+            <!-- Grid/list toggle button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonToggleView"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
+                android:padding="0dp"
+                app:icon="@android:drawable/ic_menu_agenda"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="20dp"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:contentDescription="Toggle view"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
+    <!-- Wardrobe items -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewWardrobe"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_height="match_parent"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="80dp"
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-    <Button
+    <!-- FAB — keeps same ID so Java click listener still works -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/buttonAddItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="80dp"
+        app:srcCompat="@android:drawable/ic_input_add"
+        android:contentDescription="Add item"/>
+
+    <!-- Old nav buttons kept invisible so Java doesn't crash — wire bottom nav then delete these -->
+    <Button android:id="@+id/buttonBuildOutfit" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <Button android:id="@+id/buttonAiSuggest" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <Button android:id="@+id/buttonViewOutfits" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+    <Button android:id="@+id/buttonDataStructures" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+
+    <!-- Bottom navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Item"/>
+        android:layout_gravity="bottom"
+        android:background="@color/nav_bar"
+        app:menu="@menu/bottom_nav_menu" />
 
-    <Button
-        android:id="@+id/buttonBuildOutfit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Make new outfit"/>
-
-    <Button
-        android:id="@+id/buttonAiSuggest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="AI Outfit Suggestion"/>
-
-    <Button
-        android:id="@+id/buttonViewOutfits"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="View outfits"/>
-
-    <Button
-        android:id="@+id/buttonDataStructures"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="DS Visualisation"/>
-
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

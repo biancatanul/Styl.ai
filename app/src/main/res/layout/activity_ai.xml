@@ -1,102 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/pink_bg"
     tools:context=".ui.AiActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:background="@color/nav_bar"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="14dp"
+        android:elevation="4dp">
 
-        <TextView
-            android:id="@+id/textOccasion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Occasion" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Style me for..."
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tell the AI what you need to dress for"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="2dp"/>
+        </LinearLayout>
 
-        <Spinner
-            android:id="@+id/occasionSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+    </LinearLayout>
 
-        <TextView
-            android:id="@+id/textSeason"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Season" />
-
-        <Spinner
-            android:id="@+id/seasonSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/textStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Style" />
-
-        <Spinner
-            android:id="@+id/styleSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/suggestButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Suggest Outfit" />
-
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
-            android:id="@+id/resultsLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:padding="20dp">
 
-            <TextView
-                android:id="@+id/suggestionIndexText"
+            <TextView android:id="@+id/textOccasion" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="OCCASION" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/text_secondary" android:letterSpacing="0.08" android:layout_marginBottom="6dp"/>
+            <Spinner android:id="@+id/occasionSpinner" android:layout_width="match_parent" android:layout_height="52dp" android:background="@drawable/bg_spinner" android:paddingHorizontal="12dp" android:layout_marginBottom="20dp"/>
+
+            <TextView android:id="@+id/textSeason" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SEASON" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/text_secondary" android:letterSpacing="0.08" android:layout_marginBottom="6dp"/>
+            <Spinner android:id="@+id/seasonSpinner" android:layout_width="match_parent" android:layout_height="52dp" android:background="@drawable/bg_spinner" android:paddingHorizontal="12dp" android:layout_marginBottom="20dp"/>
+
+            <TextView android:id="@+id/textStyle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="STYLE" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/text_secondary" android:letterSpacing="0.08" android:layout_marginBottom="6dp"/>
+            <Spinner android:id="@+id/styleSpinner" android:layout_width="match_parent" android:layout_height="52dp" android:background="@drawable/bg_spinner" android:paddingHorizontal="12dp" android:layout_marginBottom="28dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/suggestButton"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:text="Suggest Outfit"
+                android:textSize="15sp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:layout_marginBottom="24dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/resultsLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Suggestion 1 of 3" />
+                android:layout_marginBottom="24dp"
+                android:visibility="gone"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/surface_white"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/divider">
 
-            <LinearLayout
-                android:id="@+id/itemsLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"></LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
 
-            <LinearLayout
-                android:id="@+id/buttonLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
+                        <TextView android:id="@+id/suggestionIndexText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Suggestion 1 of 3" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/text_dark"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="AI" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/text_dark" android:background="@drawable/bg_pill_yellow" android:paddingHorizontal="12dp" android:paddingVertical="5dp"/>
+                    </LinearLayout>
 
-                <Button
-                    android:id="@+id/previousButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Previous" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Based on your selections" android:textSize="13sp" android:textColor="@color/teal" android:layout_marginBottom="16dp"/>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider" android:layout_marginBottom="16dp"/>
 
-                <Button
-                    android:id="@+id/nextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Next" />
-            </LinearLayout>
+                    <LinearLayout android:id="@+id/itemsLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
 
-            <Button
-                android:id="@+id/saveButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Save Outfit" />
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider" android:layout_marginTop="16dp" android:layout_marginBottom="16dp"/>
+
+                    <LinearLayout android:id="@+id/buttonLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="12dp">
+                        <com.google.android.material.button.MaterialButton android:id="@+id/previousButton" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" android:layout_marginEnd="8dp" android:text="Previous" android:textSize="13sp" android:insetTop="0dp" android:insetBottom="0dp" style="@style/Widget.Material3.Button.OutlinedButton"/>
+                        <com.google.android.material.button.MaterialButton android:id="@+id/nextButton" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" android:layout_marginStart="8dp" android:text="Next" android:textSize="13sp" android:insetTop="0dp" android:insetBottom="0dp" style="@style/Widget.Material3.Button.OutlinedButton"/>
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/saveButton" android:layout_width="match_parent" android:layout_height="54dp" android:text="Save Outfit" android:textSize="15sp" android:insetTop="0dp" android:insetBottom="0dp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
-    </LinearLayout>
 
-</ScrollView>
+    </ScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/nav_bar"
+        app:menu="@menu/bottom_nav_menu" />
+
+</LinearLayout>

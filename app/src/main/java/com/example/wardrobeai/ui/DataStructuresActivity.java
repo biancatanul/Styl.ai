@@ -1,17 +1,16 @@
 package com.example.wardrobeai.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
-import android.widget.Spinner;
+import android.widget.*;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wardrobeai.R;
 import com.example.wardrobeai.data.*;
 import com.example.wardrobeai.logic.*;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
 
@@ -28,7 +27,6 @@ public class DataStructuresActivity extends AppCompatActivity {
         setContentView(R.layout.activity_data_structures);
 
         container = findViewById(R.id.visualizationContainer);
-
         buildStructures();
 
         String[] options = {"Red-Black Tree", "Binomial Heap", "Compatibility Graph"};
@@ -38,15 +36,12 @@ public class DataStructuresActivity extends AppCompatActivity {
 
         Spinner spinner = findViewById(R.id.spinnerStructure);
         spinner.setAdapter(adapter);
-
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                showView(position);
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { showView(position); }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
+
+        setupBottomNav();
     }
 
     private void buildStructures() {
@@ -58,13 +53,9 @@ public class DataStructuresActivity extends AppCompatActivity {
 
         graph = repo.buildCompatibilityGraph();
 
-        // heap needs outfits, but passing an empty one for now,
-        // visualization will still show structure
         heap = new BinomialHeap();
         for (ClothingItem item : items) {
-            // insert dummy single-item outfits so the heap has nodes to display
-            com.example.wardrobeai.data.Outfit o = new com.example.wardrobeai.data.Outfit(
-                    item.getName(), java.util.List.of(item), false);
+            Outfit o = new Outfit(item.getName(), java.util.List.of(item), false);
             heap.insert(o, BinomialHeap.scoreOutfit(o, graph));
         }
     }
@@ -72,15 +63,31 @@ public class DataStructuresActivity extends AppCompatActivity {
     private void showView(int position) {
         container.removeAllViews();
         switch (position) {
-            case 0:
-                container.addView(new RedBlackTreeView(this, rbt));
-                break;
-            case 1:
-                container.addView(new BinomialHeapView(this, heap));
-                break;
-            case 2:
-                container.addView(new CompatibilityGraphView(this, WardrobeRepository.getInstance().getAllItems(), graph));
-                break;
+            case 0: container.addView(new RedBlackTreeView(this, rbt)); break;
+            case 1: container.addView(new BinomialHeapView(this, heap)); break;
+            case 2: container.addView(new CompatibilityGraphView(this, WardrobeRepository.getInstance().getAllItems(), graph)); break;
         }
+    }
+
+    private void setupBottomNav() {
+        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
+        nav.setSelectedItemId(R.id.nav_data);
+        nav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_data)     return true;
+            if (id == R.id.nav_wardrobe) { navigateTo(WardrobeActivity.class, 0); return true; }
+            if (id == R.id.nav_outfits)  { navigateTo(OutfitsActivity.class, 1); return true; }
+            if (id == R.id.nav_ai)       { navigateTo(AiActivity.class, 2); return true; }
+            return false;
+        });
+    }
+
+    // currentTabIndex for DataStructuresActivity is 3
+    private void navigateTo(Class<?> target, int targetIndex) {
+        Intent intent = new Intent(this, target);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+        // always going left since this is the last tab
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 }

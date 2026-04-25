@@ -1,26 +1,30 @@
 package com.example.wardrobeai.ui;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wardrobeai.R;
 import com.example.wardrobeai.data.*;
 import com.example.wardrobeai.logic.BinomialHeap;
 import com.example.wardrobeai.logic.CSPSolver;
 import com.example.wardrobeai.logic.CompatibilityGraph;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.*;
-
 
 public class AiActivity extends AppCompatActivity {
 
     private Spinner occasionSpinner, seasonSpinner, styleSpinner;
-    private Button suggestButton, prevButton, nextButton, saveButton;
+    private MaterialButton suggestButton, prevButton, nextButton, saveButton;
     private TextView suggestionIndexText;
-    private LinearLayout resultsLayout, itemsLayout;
+    // resultsLayout is now a MaterialCardView — View is the safe common type
+    private View resultsLayout;
+    private LinearLayout itemsLayout;
 
     private List<Outfit> suggestions = new ArrayList<>();
     private int currentIndex = 0;
@@ -36,48 +40,45 @@ public class AiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ai);
 
-        repo = WardrobeRepository.getInstance();
+        repo  = WardrobeRepository.getInstance();
         graph = repo.buildCompatibilityGraph();
 
-        occasionSpinner = findViewById(R.id.occasionSpinner);
-        seasonSpinner = findViewById(R.id.seasonSpinner);
-        styleSpinner = findViewById(R.id.styleSpinner);
-        suggestButton = findViewById(R.id.suggestButton);
-        prevButton = findViewById(R.id.previousButton);
-        nextButton = findViewById(R.id.nextButton);
-        saveButton = findViewById(R.id.saveButton);
+        occasionSpinner     = findViewById(R.id.occasionSpinner);
+        seasonSpinner       = findViewById(R.id.seasonSpinner);
+        styleSpinner        = findViewById(R.id.styleSpinner);
+        suggestButton       = findViewById(R.id.suggestButton);
+        prevButton          = findViewById(R.id.previousButton);
+        nextButton          = findViewById(R.id.nextButton);
+        saveButton          = findViewById(R.id.saveButton);
         suggestionIndexText = findViewById(R.id.suggestionIndexText);
-        resultsLayout = findViewById(R.id.resultsLayout);
-        itemsLayout = findViewById(R.id.itemsLayout);
+        resultsLayout       = findViewById(R.id.resultsLayout);
+        itemsLayout         = findViewById(R.id.itemsLayout);
 
-        ArrayAdapter<Season> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, Season.values());
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        seasonSpinner.setAdapter(adapter);
+        ArrayAdapter<Season> a1 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, Season.values());
+        a1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        seasonSpinner.setAdapter(a1);
 
-        ArrayAdapter<Occasion> adapter2 = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, Occasion.values());
-        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        occasionSpinner.setAdapter(adapter2);
+        ArrayAdapter<Occasion> a2 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, Occasion.values());
+        a2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        occasionSpinner.setAdapter(a2);
 
-        ArrayAdapter<Style> adapter3 = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, Style.values());
-        adapter3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        styleSpinner.setAdapter(adapter3);
+        ArrayAdapter<Style> a3 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, Style.values());
+        a3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        styleSpinner.setAdapter(a3);
 
         suggestButton.setOnClickListener(v -> {
             selectedOccasion = (Occasion) occasionSpinner.getSelectedItem();
-            selectedSeason = (Season) seasonSpinner.getSelectedItem();
-            selectedStyle = (Style) styleSpinner.getSelectedItem();
+            selectedSeason   = (Season)   seasonSpinner.getSelectedItem();
+            selectedStyle    = (Style)    styleSpinner.getSelectedItem();
 
             CSPSolver solver = new CSPSolver(repo.getAllItems(), graph);
             List<Outfit> candidates = solver.suggestOutfits(selectedStyle, selectedSeason, selectedOccasion, 10);
 
             if (candidates.isEmpty()) {
-                Toast.makeText(AiActivity.this, "No outfits found", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "No outfits found for these filters", Toast.LENGTH_SHORT).show();
             } else {
                 BinomialHeap heap = BinomialHeap.fromOutfits(candidates, graph);
-                suggestions = heap.drainSorted();
+                suggestions  = heap.drainSorted();
                 currentIndex = 0;
                 resultsLayout.setVisibility(View.VISIBLE);
                 displayOutfit();
@@ -85,45 +86,64 @@ public class AiActivity extends AppCompatActivity {
         });
 
         prevButton.setOnClickListener(v -> {
-            if (currentIndex > 0) {
-                currentIndex--;
-                displayOutfit();
-            }
+            if (currentIndex > 0) { currentIndex--; displayOutfit(); }
         });
 
         nextButton.setOnClickListener(v -> {
-            if (currentIndex < suggestions.size() - 1) {
-                currentIndex++;
-                displayOutfit();
-            }
+            if (currentIndex < suggestions.size() - 1) { currentIndex++; displayOutfit(); }
         });
 
         saveButton.setOnClickListener(v -> {
             repo.addOutfit(suggestions.get(currentIndex));
-            Toast.makeText(AiActivity.this, "Outfit saved", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Outfit saved", Toast.LENGTH_SHORT).show();
         });
+
+        setupBottomNav();
+    }
+
+    private void setupBottomNav() {
+        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
+        nav.setSelectedItemId(R.id.nav_ai);
+        nav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_ai)       return true;
+            if (id == R.id.nav_wardrobe) { navigateTo(WardrobeActivity.class, 0); return true; }
+            if (id == R.id.nav_outfits)  { navigateTo(OutfitsActivity.class, 1); return true; }
+            if (id == R.id.nav_data)     { navigateTo(DataStructuresActivity.class, 3); return true; }
+            return false;
+        });
+    }
+
+    // currentTabIndex for AiActivity is 2
+    private void navigateTo(Class<?> target, int targetIndex) {
+        Intent intent = new Intent(this, target);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+        if (targetIndex > 2) {
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        } else {
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        }
     }
 
     private void displayOutfit() {
         suggestionIndexText.setText("Suggestion " + (currentIndex + 1) + " of " + suggestions.size());
         itemsLayout.removeAllViews();
         for (ClothingItem item : suggestions.get(currentIndex).getItems()) {
-            TextView itemTextView = new TextView(this);
-            itemTextView.setText(item.getName() + "\n" + generateReasoning(item));
-            itemsLayout.addView(itemTextView);
+            TextView tv = new TextView(this);
+            tv.setText(item.getName() + "\n" + generateReasoning(item));
+            tv.setPadding(0, 12, 0, 12);
+            tv.setTextColor(getColor(R.color.text_dark));
+            itemsLayout.addView(tv);
         }
     }
 
     private String generateReasoning(ClothingItem item) {
-        StringBuilder reasoning = new StringBuilder();
-        if (item.hasSeason(selectedSeason))
-            reasoning.append("(matches season: ").append(selectedSeason.name()).append(") ");
-        if (item.hasOccasion(selectedOccasion))
-            reasoning.append("(matches occasion: ").append(selectedOccasion.name()).append(") ");
-        if (item.getStyle() == selectedStyle)
-            reasoning.append("(matches style: ").append(selectedStyle.name()).append(") ");
-        if (repo.isNeutral(item))
-            reasoning.append("(neutral color: goes with anything) ");
-        return reasoning.toString().trim();
+        StringBuilder sb = new StringBuilder();
+        if (item.hasSeason(selectedSeason))    sb.append("matches season: ").append(selectedSeason.name()).append("  ");
+        if (item.hasOccasion(selectedOccasion)) sb.append("matches occasion: ").append(selectedOccasion.name()).append("  ");
+        if (item.getStyle() == selectedStyle)  sb.append("matches style: ").append(selectedStyle.name()).append("  ");
+        if (repo.isNeutral(item))              sb.append("neutral color — goes with anything");
+        return sb.toString().trim();
     }
 }
