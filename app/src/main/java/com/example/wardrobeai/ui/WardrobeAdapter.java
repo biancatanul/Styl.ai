@@ -80,22 +80,41 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
     public void onBindViewHolder(ViewHolder holder, int position) {
         ClothingItem item = filteredItems.get(position);
 
+        // Category badge
+        holder.textCategory.setText(item.getCategory().name());
+
+        // Color block — use first color as background
+        if (!item.getColors().isEmpty()) {
+            try {
+                holder.colorBlock.setBackgroundColor(Color.parseColor(item.getColors().get(0)));
+            } catch (IllegalArgumentException e) {
+                holder.colorBlock.setBackgroundColor(Color.LTGRAY);
+            }
+        } else {
+            holder.colorBlock.setBackgroundColor(Color.LTGRAY);
+        }
+
+        // Circular color swatches at the bottom
         holder.colorSwatchContainer.removeAllViews();
         for (String hex : item.getColors()) {
-            View swatch = new View(holder.colorSwatchContainer.getContext());
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(40, 40);
-            params.setMargins(4, 0, 4, 0);
-            swatch.setLayoutParams(params);
+            android.graphics.drawable.GradientDrawable circle = new android.graphics.drawable.GradientDrawable();
+            circle.setShape(android.graphics.drawable.GradientDrawable.OVAL);
             try {
-                swatch.setBackgroundColor(Color.parseColor(hex));
+                circle.setColor(Color.parseColor(hex));
             } catch (IllegalArgumentException e) {
-                swatch.setBackgroundColor(Color.GRAY);
+                circle.setColor(Color.GRAY);
             }
+            circle.setStroke(2, Color.parseColor("#E8C8CC"));
+
+            View swatch = new View(holder.colorSwatchContainer.getContext());
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(36, 36);
+            params.setMargins(0, 0, 6, 0);
+            swatch.setLayoutParams(params);
+            swatch.setBackground(circle);
             holder.colorSwatchContainer.addView(swatch);
         }
 
         holder.textName.setText(item.getName());
-        holder.textDetails.setText(item.getCategory() + " · " + item.getStyle());
 
         holder.buttonMenu.setOnClickListener(v -> {
             PopupMenu popup = new PopupMenu(v.getContext(), v);
@@ -129,16 +148,18 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textName, textDetails;
+        TextView textName, textCategory;
         LinearLayout colorSwatchContainer;
         ImageButton buttonMenu;
+        View colorBlock;
 
         public ViewHolder(View itemView) {
             super(itemView);
             textName = itemView.findViewById(R.id.textItemName);
-            textDetails = itemView.findViewById(R.id.textItemDetails);
+            textCategory = itemView.findViewById(R.id.textCategory);
             colorSwatchContainer = itemView.findViewById(R.id.colorSwatchContainer);
             buttonMenu = itemView.findViewById(R.id.buttonItemMenu);
+            colorBlock = itemView.findViewById(R.id.colorBlock);
         }
     }
 }

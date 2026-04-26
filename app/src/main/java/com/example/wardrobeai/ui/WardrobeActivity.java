@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.wardrobeai.R;
 import com.example.wardrobeai.data.*;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +26,6 @@ public class WardrobeActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private WardrobeAdapter adapter;
-    private boolean isGridView = false;
-
     ActivityResultLauncher<Intent> addItemLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -42,7 +39,6 @@ public class WardrobeActivity extends AppCompatActivity {
     // these are gone from the layout (visibility=gone) but still found by findViewById
     private View buttonBuildOutfit, buttonViewOutfits, buttonAiSuggest, buttonDataStructures;
     private View buttonFilter;
-    private MaterialButton buttonToggleView;
     private EditText editTextSearch;
 
     private List<Category> filterCategories = new ArrayList<>();
@@ -64,9 +60,8 @@ public class WardrobeActivity extends AppCompatActivity {
         buttonDataStructures = findViewById(R.id.buttonDataStructures);
         editTextSearch    = findViewById(R.id.editTextSearch);
         buttonFilter      = findViewById(R.id.buttonFilter);
-        buttonToggleView  = findViewById(R.id.buttonToggleView);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         List<ClothingItem> items = WardrobeRepository.getInstance().getAllItems();
         adapter = new WardrobeAdapter(items, new WardrobeAdapter.ItemMenuListener() {
             @Override
@@ -91,17 +86,6 @@ public class WardrobeActivity extends AppCompatActivity {
 
         buttonFilter.setOnClickListener(v -> showFilterDialog());
 
-        buttonToggleView.setOnClickListener(v -> {
-            isGridView = !isGridView;
-            if (isGridView) {
-                recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-                buttonToggleView.setIconResource(android.R.drawable.ic_menu_agenda);
-            } else {
-                recyclerView.setLayoutManager(new LinearLayoutManager(this));
-                buttonToggleView.setIconResource(android.R.drawable.ic_menu_gallery);
-            }
-        });
-
         buttonAddItem.setOnClickListener(v ->
                 addItemLauncher.launch(new Intent(this, AddItemActivity.class)));
 
@@ -111,8 +95,39 @@ public class WardrobeActivity extends AppCompatActivity {
         buttonAiSuggest.setOnClickListener(v -> navigateTo(AiActivity.class, 3));
         buttonDataStructures.setOnClickListener(v -> navigateTo(DataStructuresActivity.class, 4));
 
+        com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chipGroupFilter);
+
+        com.google.android.material.chip.Chip allChip = new com.google.android.material.chip.Chip(this);
+        allChip.setText("ALL ITEMS");
+        allChip.setCheckable(true);
+        allChip.setChecked(true);
+        chipGroup.addView(allChip);
+
+        for (Occasion occasion : Occasion.values()) {
+            com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(this);
+            chip.setText(occasion.name());
+            chip.setCheckable(true);
+            chipGroup.addView(chip);
+        }
+
+        chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            filterOccasions.clear();
+            for (int id : checkedIds) {
+                com.google.android.material.chip.Chip c = group.findViewById(id);
+                if (c == null) continue;
+                String label = c.getText().toString();
+                try {
+                    filterOccasions.add(Occasion.valueOf(label));
+                } catch (IllegalArgumentException ignored) {
+                    // "ALL ITEMS" chip — no occasion filter
+                }
+            }
+            applyFilters();
+        });
+
         setupBottomNav();
     }
+
 
     private void setupBottomNav() {
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
