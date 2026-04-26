@@ -131,6 +131,17 @@
             </LinearLayout>
 
             <!-- Colors card -->
+            <!-- Colors label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="COLORS"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_secondary"
+                android:letterSpacing="0.08"
+                android:layout_marginBottom="6dp"/>
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -141,35 +152,12 @@
                 app:strokeWidth="1dp"
                 app:strokeColor="@color/divider">
 
-                <LinearLayout
+                <GridLayout
+                    android:id="@+id/colorGrid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:gravity="center_vertical">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/buttonAddColor"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:text="Colors"
-                        android:textSize="13sp"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"
-                        android:layout_marginEnd="14dp"
-                        style="@style/Widget.Material3.Button.OutlinedButton"/>
-
-                    <TextView
-                        android:id="@+id/textSelectedColors"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_secondary"
-                        android:hint="None selected"
-                        android:textColorHint="@color/text_hint"/>
-
-                </LinearLayout>
+                    android:padding="12dp"
+                    android:columnCount="6"/>
 
             </com.google.android.material.card.MaterialCardView>
 

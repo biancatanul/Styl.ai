@@ -1,6 +1,9 @@
 package com.example.wardrobeai.ui;
 
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.*;
 
 import androidx.appcompat.app.AlertDialog;
@@ -8,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wardrobeai.R;
 import com.example.wardrobeai.data.*;
+
 import java.util.*;
 
 public class AddItemActivity extends AppCompatActivity {
@@ -17,6 +21,7 @@ public class AddItemActivity extends AppCompatActivity {
     List<String> selectedOccasions = new ArrayList<>();
 
     private String editItemId = null;
+    private GridLayout colorGrid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,13 +31,12 @@ public class AddItemActivity extends AppCompatActivity {
         EditText editTextItemName = findViewById(R.id.editTextItemName);
         Spinner spinnerCategory = findViewById(R.id.spinnerCategory);
         Spinner spinnerStyle = findViewById(R.id.spinnerStyle);
-        Button buttonAddColor = findViewById(R.id.buttonAddColor);
-        TextView textSelectedColors = findViewById(R.id.textSelectedColors);
         TextView textSelectedSeasons = findViewById(R.id.textSelectedSeasons);
         TextView textSelectedOccasions = findViewById(R.id.textSelectedOccasions);
         Button buttonAddSeasons = findViewById(R.id.buttonAddSeasons);
         Button buttonAddOccasions = findViewById(R.id.buttonAddOccasions);
         Button buttonSave = findViewById(R.id.buttonSave);
+        colorGrid = findViewById(R.id.colorGrid);
 
         ArrayAdapter<Category> categoryAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, Category.values());
@@ -51,7 +55,6 @@ public class AddItemActivity extends AppCompatActivity {
             if (existing != null) {
                 editTextItemName.setText(existing.getName());
 
-                // pre-select category spinner
                 Category[] categories = Category.values();
                 for (int i = 0; i < categories.length; i++) {
                     if (categories[i] == existing.getCategory()) {
@@ -60,7 +63,6 @@ public class AddItemActivity extends AppCompatActivity {
                     }
                 }
 
-                // pre-select style spinner
                 Style[] styles = Style.values();
                 for (int i = 0; i < styles.length; i++) {
                     if (styles[i] == existing.getStyle()) {
@@ -69,35 +71,17 @@ public class AddItemActivity extends AppCompatActivity {
                     }
                 }
 
-                // pre-populate multi-select lists
                 selectedColors.addAll(existing.getColors());
                 selectedSeasons.addAll(existing.getSeasons());
                 selectedOccasions.addAll(existing.getOccasions());
 
-                textSelectedColors.setText(String.join(", ", selectedColors));
                 textSelectedSeasons.setText(String.join(", ", selectedSeasons));
                 textSelectedOccasions.setText(String.join(", ", selectedOccasions));
             }
         }
 
-        buttonAddColor.setOnClickListener(v -> {
-            String[] colorNames = new String[ClothingColor.values().length];
-            for (int i = 0; i < ClothingColor.values().length; i++)
-                colorNames[i] = ClothingColor.values()[i].name();
-            boolean[] checked = new boolean[ClothingColor.values().length];
-            for (int i = 0; i < ClothingColor.values().length; i++)
-                checked[i] = selectedColors.contains(ClothingColor.values()[i].getHex());
-            new AlertDialog.Builder(this)
-                    .setTitle("Select Colors")
-                    .setMultiChoiceItems(colorNames, checked, (dialog, which, isChecked) -> {
-                        String hex = ClothingColor.values()[which].getHex();
-                        if (isChecked) selectedColors.add(hex);
-                        else selectedColors.remove(hex);
-                    })
-                    .setPositiveButton("OK", (dialog, which) ->
-                            textSelectedColors.setText(String.join(", ", selectedColors)))
-                    .show();
-        });
+        // build color circles (after selectedColors is populated in edit mode)
+        setupColorPicker();
 
         buttonAddSeasons.setOnClickListener(v -> {
             String[] seasonNames = new String[Season.values().length];
@@ -156,5 +140,54 @@ public class AddItemActivity extends AppCompatActivity {
             setResult(RESULT_OK);
             finish();
         });
+    }
+
+    private void setupColorPicker() {
+        colorGrid.removeAllViews();
+        int circleSize = dpToPx(44);
+        int margin = dpToPx(6);
+
+        for (ClothingColor color : ClothingColor.values()) {
+            View circle = new View(this);
+            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+            params.width = circleSize;
+            params.height = circleSize;
+            params.setMargins(margin, margin, margin, margin);
+            circle.setLayoutParams(params);
+
+            setCircleDrawable(circle, color, selectedColors.contains(color.getHex()));
+
+            circle.setOnClickListener(v -> {
+                String hex = color.getHex();
+                if (selectedColors.contains(hex)) {
+                    selectedColors.remove(hex);
+                    setCircleDrawable(circle, color, false);
+                } else {
+                    selectedColors.add(hex);
+                    setCircleDrawable(circle, color, true);
+                }
+            });
+
+            colorGrid.addView(circle);
+        }
+    }
+
+    private void setCircleDrawable(View circle, ClothingColor color, boolean selected) {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setShape(GradientDrawable.OVAL);
+        drawable.setColor(Color.parseColor(color.getHex()));
+        if (selected) {
+            int strokeColor = (color == ClothingColor.WHITE || color == ClothingColor.BEIGE)
+                    ? Color.parseColor("#555555")
+                    : Color.parseColor("#1a1a1a");
+            drawable.setStroke(dpToPx(3), strokeColor);
+        } else {
+            drawable.setStroke(dpToPx(1), Color.parseColor("#CCCCCC"));
+        }
+        circle.setBackground(drawable);
+    }
+
+    private int dpToPx(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
     }
 }
