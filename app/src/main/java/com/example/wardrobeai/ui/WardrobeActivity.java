@@ -147,11 +147,6 @@ public class WardrobeActivity extends AppCompatActivity {
         Intent intent = new Intent(this, target);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);
-        if (targetIndex > 0) {
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-        } else {
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-        }
     }
 
     private void showFilterDialog() {
@@ -232,5 +227,7 @@ public class WardrobeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         adapter.notifyDataSetChanged();
+        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
+        nav.setSelectedItemId(R.id.nav_wardrobe);
     }
 }

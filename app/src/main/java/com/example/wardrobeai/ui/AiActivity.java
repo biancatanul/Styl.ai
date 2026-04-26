@@ -119,11 +119,6 @@ public class AiActivity extends AppCompatActivity {
         Intent intent = new Intent(this, target);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);
-        if (targetIndex > 2) {
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-        } else {
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-        }
     }
 
     private void displayOutfit() {
@@ -145,5 +140,12 @@ public class AiActivity extends AppCompatActivity {
         if (item.getStyle() == selectedStyle)  sb.append("matches style: ").append(selectedStyle.name()).append("  ");
         if (repo.isNeutral(item))              sb.append("neutral color — goes with anything");
         return sb.toString().trim();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
+        nav.setSelectedItemId(R.id.nav_ai);
     }
 }

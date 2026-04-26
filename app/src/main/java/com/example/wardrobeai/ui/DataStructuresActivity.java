@@ -37,8 +37,14 @@ public class DataStructuresActivity extends AppCompatActivity {
         Spinner spinner = findViewById(R.id.spinnerStructure);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { showView(position); }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                showView(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
 
         setupBottomNav();
@@ -63,9 +69,15 @@ public class DataStructuresActivity extends AppCompatActivity {
     private void showView(int position) {
         container.removeAllViews();
         switch (position) {
-            case 0: container.addView(new RedBlackTreeView(this, rbt)); break;
-            case 1: container.addView(new BinomialHeapView(this, heap)); break;
-            case 2: container.addView(new CompatibilityGraphView(this, WardrobeRepository.getInstance().getAllItems(), graph)); break;
+            case 0:
+                container.addView(new RedBlackTreeView(this, rbt));
+                break;
+            case 1:
+                container.addView(new BinomialHeapView(this, heap));
+                break;
+            case 2:
+                container.addView(new CompatibilityGraphView(this, WardrobeRepository.getInstance().getAllItems(), graph));
+                break;
         }
     }
 
@@ -74,10 +86,19 @@ public class DataStructuresActivity extends AppCompatActivity {
         nav.setSelectedItemId(R.id.nav_data);
         nav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_data)     return true;
-            if (id == R.id.nav_wardrobe) { navigateTo(WardrobeActivity.class, 0); return true; }
-            if (id == R.id.nav_outfits)  { navigateTo(OutfitsActivity.class, 1); return true; }
-            if (id == R.id.nav_ai)       { navigateTo(AiActivity.class, 2); return true; }
+            if (id == R.id.nav_data) return true;
+            if (id == R.id.nav_wardrobe) {
+                navigateTo(WardrobeActivity.class, 0);
+                return true;
+            }
+            if (id == R.id.nav_outfits) {
+                navigateTo(OutfitsActivity.class, 1);
+                return true;
+            }
+            if (id == R.id.nav_ai) {
+                navigateTo(AiActivity.class, 2);
+                return true;
+            }
             return false;
         });
     }
@@ -87,7 +108,12 @@ public class DataStructuresActivity extends AppCompatActivity {
         Intent intent = new Intent(this, target);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);
-        // always going left since this is the last tab
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
+        nav.setSelectedItemId(R.id.nav_data);
     }
 }
