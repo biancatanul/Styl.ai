@@ -15,6 +15,7 @@ import com.example.wardrobeai.logic.CompatibilityGraph;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 public class CompatibilityGraphView extends View {
 
@@ -117,29 +118,66 @@ public class CompatibilityGraphView extends View {
         }
     }
 
-    private String buildDetails(ClothingItem item) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Category: ").append(item.getCategory()).append("\n");
-        sb.append("Style: ").append(item.getStyle()).append("\n");
-        sb.append("Colors: ").append(item.getColors()).append("\n");
-        sb.append("Seasons: ").append(item.getSeasons()).append("\n");
-        sb.append("Occasions: ").append(item.getOccasions()).append("\n");
+    private String colorName(String hex) {
+        for (com.example.wardrobeai.data.ClothingColor c : com.example.wardrobeai.data.ClothingColor.values()) {
+            if (c.getHex().equalsIgnoreCase(hex)) return c.name().charAt(0) + c.name().substring(1).toLowerCase();
+        }
+        return hex;
+    }
 
+    private String colorList(List<String> hexColors) {
+        List<String> names = new ArrayList<>();
+        for (String hex : hexColors) names.add(colorName(hex));
+        return String.join(", ", names);
+    }
+
+    private String buildDetails(ClothingItem item) {
         Map<String, List<String>> adjacency = graph.getAdjacencyList();
         List<String> neighborIds = adjacency.get(item.getId());
+        int neighborCount = neighborIds != null ? neighborIds.size() : 0;
+
+        String category = item.getCategory().name().charAt(0)
+                + item.getCategory().name().substring(1).toLowerCase();
+        String style = item.getStyle().name().charAt(0)
+                + item.getStyle().name().substring(1).toLowerCase();
+        String colors = colorList(item.getColors());
+
+        // check if neutral
+        boolean isNeutral = false;
+        for (String hex : item.getColors()) {
+            String name = colorName(hex).toLowerCase();
+            if (name.equals("black") || name.equals("white") || name.equals("gray")) {
+                isNeutral = true;
+                break;
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(item.getName()).append(" is a ").append(style.toLowerCase())
+                .append(" ").append(category.toLowerCase()).append(" in ").append(colors).append(". ");
+
+        if (isNeutral) {
+            sb.append("Its neutral color means it pairs with almost any item regardless of style. ");
+        }
+
+        sb.append("It is compatible with ").append(neighborCount)
+                .append(" item(s) in your wardrobe.");
+
         if (neighborIds != null && !neighborIds.isEmpty()) {
-            sb.append("Compatible with:\n");
+            sb.append("\n\nCompatible with:\n");
             for (String neighborId : neighborIds) {
                 for (ClothingItem other : items) {
                     if (other.getId().equals(neighborId)) {
-                        sb.append("  - ").append(other.getName()).append("\n");
+                        String otherCategory = other.getCategory().name().charAt(0)
+                                + other.getCategory().name().substring(1).toLowerCase();
+                        sb.append("  - ").append(other.getName())
+                                .append(" (").append(otherCategory).append(")\n");
                         break;
                     }
                 }
             }
-        } else {
-            sb.append("Compatible with: none");
         }
+
         return sb.toString().trim();
     }
 

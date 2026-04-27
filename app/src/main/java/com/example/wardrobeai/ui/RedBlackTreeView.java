@@ -9,9 +9,12 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
+import com.example.wardrobeai.data.ClothingItem;
 import com.example.wardrobeai.logic.RedBlackTree;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RedBlackTreeView extends View {
@@ -119,15 +122,37 @@ public class RedBlackTreeView extends View {
         }
     }
 
+    private String colorName(String hex) {
+        for (com.example.wardrobeai.data.ClothingColor c : com.example.wardrobeai.data.ClothingColor.values()) {
+            if (c.getHex().equalsIgnoreCase(hex)) return c.name().charAt(0) + c.name().substring(1).toLowerCase();
+        }
+        return hex;
+    }
+
+    private String colorList(List<String> hexColors) {
+        List<String> names = new ArrayList<>();
+        for (String hex : hexColors) names.add(colorName(hex));
+        return String.join(", ", names);
+    }
+
     private String buildDetails(RedBlackTree.VisNode node) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Color: ").append(node.isRed ? "Red" : "Black").append("\n");
-        sb.append("Category: ").append(node.item.getCategory()).append("\n");
-        sb.append("Style: ").append(node.item.getStyle()).append("\n");
-        sb.append("Colors: ").append(node.item.getColors()).append("\n");
-        sb.append("Left child: ").append(node.left != null ? node.left.item.getName() : "none").append("\n");
-        sb.append("Right child: ").append(node.right != null ? node.right.item.getName() : "none");
-        return sb.toString();
+        ClothingItem item = node.item;
+        String nodeColor = node.isRed ? "red" : "black";
+        String leftName  = node.left  != null ? node.left.item.getName()  : "none";
+        String rightName = node.right != null ? node.right.item.getName() : "none";
+
+        String category = item.getCategory().name().charAt(0)
+                + item.getCategory().name().substring(1).toLowerCase();
+        String style = item.getStyle().name().charAt(0)
+                + item.getStyle().name().substring(1).toLowerCase();
+
+        return item.getName() + " is stored as a " + nodeColor + " node. "
+                + "Items in the tree are sorted alphabetically, so its left subtree holds items "
+                + "that come before it (" + leftName + ") and its right subtree holds items "
+                + "that come after (" + rightName + ").\n\n"
+                + "Category: " + category + "\n"
+                + "Style: " + style + "\n"
+                + "Colors: " + colorList(item.getColors());
     }
 
     @Override

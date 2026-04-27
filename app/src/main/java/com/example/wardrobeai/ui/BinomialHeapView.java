@@ -149,15 +149,41 @@ public class BinomialHeapView extends View {
         }
     }
 
-    private String buildDetails(BinomialHeap.Node node) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Score: ").append(node.score).append("\n");
-        sb.append("Degree: ").append(node.getDegree()).append("\n");
-        sb.append("Items:\n");
-        for (ClothingItem item : node.outfit.getItems()) {
-            sb.append("  - ").append(item.getName())
-                    .append(" (").append(item.getCategory()).append(")\n");
+    private String colorName(String hex) {
+        for (com.example.wardrobeai.data.ClothingColor c : com.example.wardrobeai.data.ClothingColor.values()) {
+            if (c.getHex().equalsIgnoreCase(hex)) return c.name().charAt(0) + c.name().substring(1).toLowerCase();
         }
+        return hex;
+    }
+
+    private String buildDetails(BinomialHeap.Node node) {
+        List<ClothingItem> outfitItems = node.outfit.getItems();
+        int itemCount = outfitItems.size();
+        int maxScore  = itemCount * (itemCount - 1) / 2; // C(n,2)
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Outfit ").append(outfitLabels.getOrDefault(node, "?"))
+                .append(" scored ").append(node.score).append("/").append(maxScore)
+                .append(" compatibility points");
+
+        if (node.score == maxScore) {
+            sb.append(" -- every pair of items works together.");
+        } else {
+            sb.append(" -- some pairs are not fully compatible.");
+        }
+
+        sb.append(" This is a B").append(node.getDegree())
+                .append(" binomial tree, meaning it has ").append((int) Math.pow(2, node.getDegree()))
+                .append(" node(s) in its subtree.\n\n");
+
+        sb.append("Items:\n");
+        for (ClothingItem item : outfitItems) {
+            String category = item.getCategory().name().charAt(0)
+                    + item.getCategory().name().substring(1).toLowerCase();
+            sb.append("  ").append(item.getName())
+                    .append(" (").append(category).append(")\n");
+        }
+
         return sb.toString().trim();
     }
 

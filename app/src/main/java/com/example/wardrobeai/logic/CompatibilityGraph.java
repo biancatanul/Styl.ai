@@ -15,10 +15,12 @@ public class CompatibilityGraph {
         if (!adjacencyList.containsKey(item.getId()))
             adjacencyList.put(item.getId(), new ArrayList<>());}
 
-    public void addEdge(ClothingItem item1, ClothingItem item2){
+    public void addEdge(ClothingItem item1, ClothingItem item2) {
         if (!adjacencyList.containsKey(item1.getId()) || !adjacencyList.containsKey(item2.getId())) return;
-        adjacencyList.get(item1.getId()).add(item2.getId());
-        adjacencyList.get(item2.getId()).add(item1.getId());
+        if (!adjacencyList.get(item1.getId()).contains(item2.getId())) {
+            adjacencyList.get(item1.getId()).add(item2.getId());
+            adjacencyList.get(item2.getId()).add(item1.getId());
+        }
     }
 
     public boolean areCompatible(ClothingItem item1, ClothingItem item2){
