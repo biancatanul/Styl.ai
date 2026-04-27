@@ -18,6 +18,16 @@ import java.util.Map;
 
 public class CompatibilityGraphView extends View {
 
+    public interface OnNodeTappedListener {
+        void onNodeTapped(String title, String details);
+    }
+
+    private OnNodeTappedListener listener;
+
+    public void setOnNodeTappedListener(OnNodeTappedListener l) {
+        this.listener = l;
+    }
+
     private final List<ClothingItem> items;
     private final CompatibilityGraph graph;
     private final Map<String, float[]> positions = new HashMap<>();
@@ -27,9 +37,11 @@ public class CompatibilityGraphView extends View {
     private final Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private static final float NODE_RADIUS = 60f;
+    private static final float TAP_SLOP    = 10f;
 
     private final Matrix matrix = new Matrix();
     private float lastTouchX, lastTouchY;
+    private float downX, downY;
     private ScaleGestureDetector scaleDetector;
 
     public CompatibilityGraphView(Context context, List<ClothingItem> items, CompatibilityGraph graph) {
@@ -58,18 +70,77 @@ public class CompatibilityGraphView extends View {
 
         setOnTouchListener((v, event) -> {
             scaleDetector.onTouchEvent(event);
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                lastTouchX = event.getX();
-                lastTouchY = event.getY();
-            } else if (event.getActionMasked() == MotionEvent.ACTION_MOVE
-                    && event.getPointerCount() == 1) {
-                matrix.postTranslate(event.getX() - lastTouchX, event.getY() - lastTouchY);
-                lastTouchX = event.getX();
-                lastTouchY = event.getY();
-                invalidate();
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    downX = event.getX();
+                    downY = event.getY();
+                    lastTouchX = event.getX();
+                    lastTouchY = event.getY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (event.getPointerCount() == 1) {
+                        matrix.postTranslate(event.getX() - lastTouchX, event.getY() - lastTouchY);
+                        lastTouchX = event.getX();
+                        lastTouchY = event.getY();
+                        invalidate();
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    float dx = event.getX() - downX;
+                    float dy = event.getY() - downY;
+                    if (Math.sqrt(dx * dx + dy * dy) < TAP_SLOP) {
+                        handleTap(event.getX(), event.getY());
+                    }
+                    break;
             }
             return true;
         });
+    }
+
+    private void handleTap(float screenX, float screenY) {
+        Matrix inverse = new Matrix();
+        matrix.invert(inverse);
+        float[] point = {screenX, screenY};
+        inverse.mapPoints(point);
+        float canvasX = point[0];
+        float canvasY = point[1];
+
+        for (ClothingItem item : items) {
+            float[] pos = positions.get(item.getId());
+            if (pos == null) continue;
+            float dx = canvasX - pos[0];
+            float dy = canvasY - pos[1];
+            if (Math.sqrt(dx * dx + dy * dy) <= NODE_RADIUS && listener != null) {
+                listener.onNodeTapped(item.getName(), buildDetails(item));
+                return;
+            }
+        }
+    }
+
+    private String buildDetails(ClothingItem item) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Category: ").append(item.getCategory()).append("\n");
+        sb.append("Style: ").append(item.getStyle()).append("\n");
+        sb.append("Colors: ").append(item.getColors()).append("\n");
+        sb.append("Seasons: ").append(item.getSeasons()).append("\n");
+        sb.append("Occasions: ").append(item.getOccasions()).append("\n");
+
+        Map<String, List<String>> adjacency = graph.getAdjacencyList();
+        List<String> neighborIds = adjacency.get(item.getId());
+        if (neighborIds != null && !neighborIds.isEmpty()) {
+            sb.append("Compatible with:\n");
+            for (String neighborId : neighborIds) {
+                for (ClothingItem other : items) {
+                    if (other.getId().equals(neighborId)) {
+                        sb.append("  - ").append(other.getName()).append("\n");
+                        break;
+                    }
+                }
+            }
+        } else {
+            sb.append("Compatible with: none");
+        }
+        return sb.toString().trim();
     }
 
     @Override

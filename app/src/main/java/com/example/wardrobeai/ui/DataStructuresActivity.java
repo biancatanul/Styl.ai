@@ -17,6 +17,10 @@ import java.util.List;
 public class DataStructuresActivity extends AppCompatActivity {
 
     private FrameLayout container;
+    private LinearLayout nodeDetailPanel;
+    private TextView nodeDetailTitle;
+    private TextView nodeDetailBody;
+
     private RedBlackTree rbt;
     private BinomialHeap heap;
     private CompatibilityGraph graph;
@@ -26,7 +30,13 @@ public class DataStructuresActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data_structures);
 
-        container = findViewById(R.id.visualizationContainer);
+        container       = findViewById(R.id.visualizationContainer);
+        nodeDetailPanel = findViewById(R.id.nodeDetailPanel);
+        nodeDetailTitle = findViewById(R.id.nodeDetailTitle);
+        nodeDetailBody  = findViewById(R.id.nodeDetailBody);
+
+        findViewById(R.id.nodeDetailDismiss).setOnClickListener(v ->
+                nodeDetailPanel.setVisibility(View.GONE));
         buildStructures();
 
         String[] options = {"Red-Black Tree", "Binomial Heap", "Compatibility Graph"};
@@ -48,6 +58,12 @@ public class DataStructuresActivity extends AppCompatActivity {
         });
 
         setupBottomNav();
+    }
+
+    private void showPanel(String title, String details) {
+        nodeDetailTitle.setText(title);
+        nodeDetailBody.setText(details);
+        nodeDetailPanel.setVisibility(View.VISIBLE);
     }
 
     private void buildStructures() {
@@ -81,15 +97,25 @@ public class DataStructuresActivity extends AppCompatActivity {
     private void showView(int position) {
         container.removeAllViews();
         switch (position) {
-            case 0:
-                container.addView(new RedBlackTreeView(this, rbt));
+            case 0: {
+                RedBlackTreeView view = new RedBlackTreeView(this, rbt);
+                view.setOnNodeTappedListener((title, details) -> showPanel(title, details));
+                container.addView(view);
                 break;
-            case 1:
-                container.addView(new BinomialHeapView(this, heap));
+            }
+            case 1: {
+                BinomialHeapView view = new BinomialHeapView(this, heap);
+                view.setOnNodeTappedListener((title, details) -> showPanel(title, details));
+                container.addView(view);
                 break;
-            case 2:
-                container.addView(new CompatibilityGraphView(this, WardrobeRepository.getInstance().getAllItems(), graph));
+            }
+            case 2: {
+                CompatibilityGraphView view = new CompatibilityGraphView(this,
+                        WardrobeRepository.getInstance().getAllItems(), graph);
+                view.setOnNodeTappedListener((title, details) -> showPanel(title, details));
+                container.addView(view);
                 break;
+            }
         }
     }
 

@@ -16,6 +16,16 @@ import java.util.Map;
 
 public class RedBlackTreeView extends View {
 
+    public interface OnNodeTappedListener {
+        void onNodeTapped(String title, String details);
+    }
+
+    private OnNodeTappedListener listener;
+
+    public void setOnNodeTappedListener(OnNodeTappedListener l) {
+        this.listener = l;
+    }
+
     private final RedBlackTree.VisNode root;
     private final Paint nodePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint edgePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -24,9 +34,12 @@ public class RedBlackTreeView extends View {
     private static final float NODE_RADIUS = 60f;
     private static final float LEVEL_HEIGHT = 160f;
     private static final float NODE_SPACING = 20f;
+    private static final float TAP_SLOP = 10f;
+
 
     private final Matrix matrix = new Matrix();
     private float lastTouchX, lastTouchY;
+    private float downX, downY;
     private ScaleGestureDetector scaleDetector;
 
     private final Map<RedBlackTree.VisNode, float[]> positions = new HashMap<>();
@@ -56,18 +69,65 @@ public class RedBlackTreeView extends View {
 
         setOnTouchListener((v, event) -> {
             scaleDetector.onTouchEvent(event);
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                lastTouchX = event.getX();
-                lastTouchY = event.getY();
-            } else if (event.getActionMasked() == MotionEvent.ACTION_MOVE
-                    && event.getPointerCount() == 1) {
-                matrix.postTranslate(event.getX() - lastTouchX, event.getY() - lastTouchY);
-                lastTouchX = event.getX();
-                lastTouchY = event.getY();
-                invalidate();
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    downX = event.getX();
+                    downY = event.getY();
+                    lastTouchX = event.getX();
+                    lastTouchY = event.getY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (event.getPointerCount() == 1) {
+                        matrix.postTranslate(event.getX() - lastTouchX, event.getY() - lastTouchY);
+                        lastTouchX = event.getX();
+                        lastTouchY = event.getY();
+                        invalidate();
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    float dx = event.getX() - downX;
+                    float dy = event.getY() - downY;
+                    if (Math.sqrt(dx * dx + dy * dy) < TAP_SLOP) {
+                        handleTap(event.getX(), event.getY());
+                    }
+                    break;
             }
             return true;
         });
+    }
+
+    private void handleTap(float screenX, float screenY) {
+        // invert the matrix to convert screen coords -> canvas coords
+        Matrix inverse = new Matrix();
+        matrix.invert(inverse);
+        float[] point = {screenX, screenY};
+        inverse.mapPoints(point);
+        float canvasX = point[0];
+        float canvasY = point[1];
+
+        for (Map.Entry<RedBlackTree.VisNode, float[]> entry : positions.entrySet()) {
+            float[] pos = entry.getValue();
+            float dx = canvasX - pos[0];
+            float dy = canvasY - pos[1];
+            if (Math.sqrt(dx * dx + dy * dy) <= NODE_RADIUS && listener != null) {
+                RedBlackTree.VisNode node = entry.getKey();
+                String title = node.item.getName();
+                String details = buildDetails(node);
+                listener.onNodeTapped(title, details);
+                return;
+            }
+        }
+    }
+
+    private String buildDetails(RedBlackTree.VisNode node) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Color: ").append(node.isRed ? "Red" : "Black").append("\n");
+        sb.append("Category: ").append(node.item.getCategory()).append("\n");
+        sb.append("Style: ").append(node.item.getStyle()).append("\n");
+        sb.append("Colors: ").append(node.item.getColors()).append("\n");
+        sb.append("Left child: ").append(node.left != null ? node.left.item.getName() : "none").append("\n");
+        sb.append("Right child: ").append(node.right != null ? node.right.item.getName() : "none");
+        return sb.toString();
     }
 
     @Override

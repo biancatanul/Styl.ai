@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
+import com.example.wardrobeai.data.ClothingItem;
 import com.example.wardrobeai.logic.BinomialHeap;
 
 import java.util.ArrayList;
@@ -19,6 +20,16 @@ import java.util.List;
 import java.util.Map;
 
 public class BinomialHeapView extends View {
+
+    public interface OnNodeTappedListener {
+        void onNodeTapped(String title, String details);
+    }
+
+    private OnNodeTappedListener listener;
+
+    public void setOnNodeTappedListener(OnNodeTappedListener l) {
+        this.listener = l;
+    }
 
     private final BinomialHeap.Node heapHead;
     private final Paint nodePaint   = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -31,9 +42,12 @@ public class BinomialHeapView extends View {
     private static final float LEVEL_HEIGHT = 160f;
     private static final float TREE_SPACING = 120f;
     private static final float BOX_PADDING  = 40f;
+    private static final float TAP_SLOP     = 10f;
+
 
     private final Matrix matrix = new Matrix();
     private float lastTouchX, lastTouchY;
+    private float downX, downY;
     private ScaleGestureDetector scaleDetector;
 
     private final Map<BinomialHeap.Node, float[]> positions = new HashMap<>();
@@ -80,15 +94,28 @@ public class BinomialHeapView extends View {
 
         setOnTouchListener((v, event) -> {
             scaleDetector.onTouchEvent(event);
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                lastTouchX = event.getX();
-                lastTouchY = event.getY();
-            } else if (event.getActionMasked() == MotionEvent.ACTION_MOVE
-                    && event.getPointerCount() == 1) {
-                matrix.postTranslate(event.getX() - lastTouchX, event.getY() - lastTouchY);
-                lastTouchX = event.getX();
-                lastTouchY = event.getY();
-                invalidate();
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    downX = event.getX();
+                    downY = event.getY();
+                    lastTouchX = event.getX();
+                    lastTouchY = event.getY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (event.getPointerCount() == 1) {
+                        matrix.postTranslate(event.getX() - lastTouchX, event.getY() - lastTouchY);
+                        lastTouchX = event.getX();
+                        lastTouchY = event.getY();
+                        invalidate();
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    float dx = event.getX() - downX;
+                    float dy = event.getY() - downY;
+                    if (Math.sqrt(dx * dx + dy * dy) < TAP_SLOP) {
+                        handleTap(event.getX(), event.getY());
+                    }
+                    break;
             }
             return true;
         });
@@ -99,6 +126,39 @@ public class BinomialHeapView extends View {
         outfitLabels.put(n, "#" + counter[0]++);
         assignLabels(n.getChild(), counter);
         assignLabels(n.getSibling(), counter);
+    }
+
+    private void handleTap(float screenX, float screenY) {
+        Matrix inverse = new Matrix();
+        matrix.invert(inverse);
+        float[] point = {screenX, screenY};
+        inverse.mapPoints(point);
+        float canvasX = point[0];
+        float canvasY = point[1];
+
+        for (Map.Entry<BinomialHeap.Node, float[]> entry : positions.entrySet()) {
+            float[] pos = entry.getValue();
+            float dx = canvasX - pos[0];
+            float dy = canvasY - pos[1];
+            if (Math.sqrt(dx * dx + dy * dy) <= NODE_RADIUS && listener != null) {
+                BinomialHeap.Node node = entry.getKey();
+                String label = outfitLabels.getOrDefault(node, "?");
+                listener.onNodeTapped(label, buildDetails(node));
+                return;
+            }
+        }
+    }
+
+    private String buildDetails(BinomialHeap.Node node) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Score: ").append(node.score).append("\n");
+        sb.append("Degree: ").append(node.getDegree()).append("\n");
+        sb.append("Items:\n");
+        for (ClothingItem item : node.outfit.getItems()) {
+            sb.append("  - ").append(item.getName())
+                    .append(" (").append(item.getCategory()).append(")\n");
+        }
+        return sb.toString().trim();
     }
 
     @Override
