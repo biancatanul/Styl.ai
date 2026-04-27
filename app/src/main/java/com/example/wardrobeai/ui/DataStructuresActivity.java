@@ -59,10 +59,22 @@ public class DataStructuresActivity extends AppCompatActivity {
 
         graph = repo.buildCompatibilityGraph();
 
+        CSPSolver csp = new CSPSolver(items, graph);
         heap = new BinomialHeap();
-        for (ClothingItem item : items) {
-            Outfit o = new Outfit(item.getName(), java.util.List.of(item), false);
-            heap.insert(o, BinomialHeap.scoreOutfit(o, graph));
+        int total = 0;
+
+        outer:
+        for (Style style : Style.values()) {
+            for (Season season : Season.values()) {
+                for (Occasion occasion : Occasion.values()) {
+                    List<Outfit> outfits = csp.suggestOutfits(style, season, occasion, 2);
+                    for (Outfit outfit : outfits) {
+                        heap.insert(outfit, BinomialHeap.scoreOutfit(outfit, graph));
+                        total++;
+                        if (total >= 20) break outer;
+                    }
+                }
+            }
         }
     }
 

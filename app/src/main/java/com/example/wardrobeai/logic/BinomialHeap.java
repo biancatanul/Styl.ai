@@ -35,6 +35,7 @@ public class BinomialHeap {
         }
         public Node getSibling() { return sibling; }
         public Node getChild() { return child; }
+        public int getDegree() { return degree; }
     }
 
     // ── Fields ────────────────────────────────────────────────────────────────

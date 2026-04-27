@@ -3,27 +3,34 @@ package com.example.wardrobeai.ui;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import com.example.wardrobeai.logic.BinomialHeap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BinomialHeapView extends View {
 
     private final BinomialHeap.Node heapHead;
-    private final Paint nodePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint edgePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint nodePaint   = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint edgePaint   = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint textPaint   = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint boxPaint    = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint boxLabelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-    private static final float NODE_RADIUS = 60f;
+    private static final float NODE_RADIUS  = 60f;
     private static final float LEVEL_HEIGHT = 160f;
-    private static final float TREE_SPACING = 100f;
+    private static final float TREE_SPACING = 120f;
+    private static final float BOX_PADDING  = 40f;
 
     private final Matrix matrix = new Matrix();
     private float lastTouchX, lastTouchY;
@@ -31,17 +38,34 @@ public class BinomialHeapView extends View {
 
     private final Map<BinomialHeap.Node, float[]> positions = new HashMap<>();
 
+    // outfit index label map: node -> "#1", "#2" ...
+    private final Map<BinomialHeap.Node, String> outfitLabels = new HashMap<>();
+
     public BinomialHeapView(Context context, BinomialHeap heap) {
         super(context);
         this.heapHead = heap.getHead();
 
-        edgePaint.setColor(Color.GRAY);
+        edgePaint.setColor(Color.rgb(180, 180, 180));
         edgePaint.setStrokeWidth(4f);
         edgePaint.setStyle(Paint.Style.STROKE);
 
-        textPaint.setTextSize(24f);
+        textPaint.setTextSize(26f);
         textPaint.setColor(Color.WHITE);
         textPaint.setTextAlign(Paint.Align.CENTER);
+
+        boxPaint.setStyle(Paint.Style.STROKE);
+        boxPaint.setColor(Color.rgb(120, 120, 120));
+        boxPaint.setStrokeWidth(3f);
+        boxPaint.setPathEffect(new DashPathEffect(new float[]{18f, 10f}, 0f));
+
+        boxLabelPaint.setTextSize(30f);
+        boxLabelPaint.setColor(Color.rgb(200, 200, 200));
+        boxLabelPaint.setTextAlign(Paint.Align.LEFT);
+        boxLabelPaint.setFakeBoldText(true);
+
+        // assign index labels to all nodes in insertion order (root list first)
+        int[] counter = {1};
+        assignLabels(heapHead, counter);
 
         scaleDetector = new ScaleGestureDetector(context,
                 new ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -70,11 +94,18 @@ public class BinomialHeapView extends View {
         });
     }
 
+    private void assignLabels(BinomialHeap.Node n, int[] counter) {
+        if (n == null) return;
+        outfitLabels.put(n, "#" + counter[0]++);
+        assignLabels(n.getChild(), counter);
+        assignLabels(n.getSibling(), counter);
+    }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         positions.clear();
-        float xOffset = NODE_RADIUS + 20;
+        float xOffset = NODE_RADIUS + BOX_PADDING + 20;
         BinomialHeap.Node tree = heapHead;
         while (tree != null) {
             assignPositions(tree, xOffset, 0);
@@ -83,7 +114,7 @@ public class BinomialHeapView extends View {
             tree = tree.getSibling();
         }
         matrix.reset();
-        matrix.postTranslate(0, NODE_RADIUS + 20);
+        matrix.postTranslate(0, NODE_RADIUS + BOX_PADDING + 40);
     }
 
     private int treeWidth(BinomialHeap.Node n) {
@@ -99,12 +130,9 @@ public class BinomialHeapView extends View {
 
     private float assignPositions(BinomialHeap.Node n, float startX, int depth) {
         if (n == null) return startX;
-
-        // assign children first, left to right
         float childX = startX;
         BinomialHeap.Node child = n.getChild();
         float firstChildX = -1, lastChildX = -1;
-
         while (child != null) {
             childX = assignPositions(child, childX, depth + 1);
             float[] childPos = positions.get(child);
@@ -112,8 +140,6 @@ public class BinomialHeapView extends View {
             lastChildX = childPos[0];
             child = child.getSibling();
         }
-
-        // center root over its children, or just place it at startX if it's a leaf
         float rootX;
         if (firstChildX >= 0) {
             rootX = (firstChildX + lastChildX) / 2f;
@@ -121,9 +147,20 @@ public class BinomialHeapView extends View {
             rootX = startX;
             childX = startX + NODE_RADIUS * 2 + 20;
         }
-
         positions.put(n, new float[]{rootX, depth * LEVEL_HEIGHT});
         return childX;
+    }
+
+    // collect all positions within a single tree (children only, not siblings)
+    private void collectTreePositions(BinomialHeap.Node n, List<float[]> out) {
+        if (n == null) return;
+        float[] pos = positions.get(n);
+        if (pos != null) out.add(pos);
+        BinomialHeap.Node child = n.getChild();
+        while (child != null) {
+            collectTreePositions(child, out);
+            child = child.getSibling();
+        }
     }
 
     @Override
@@ -136,6 +173,36 @@ public class BinomialHeapView extends View {
         }
         canvas.save();
         canvas.concat(matrix);
+
+        // draw bounding boxes per tree
+        BinomialHeap.Node tree = heapHead;
+        while (tree != null) {
+            List<float[]> treePositions = new ArrayList<>();
+            collectTreePositions(tree, treePositions);
+            if (!treePositions.isEmpty()) {
+                float minX = Float.MAX_VALUE, maxX = Float.MIN_VALUE;
+                float minY = Float.MAX_VALUE, maxY = Float.MIN_VALUE;
+                for (float[] p : treePositions) {
+                    minX = Math.min(minX, p[0]);
+                    maxX = Math.max(maxX, p[0]);
+                    minY = Math.min(minY, p[1]);
+                    maxY = Math.max(maxY, p[1]);
+                }
+                RectF box = new RectF(
+                        minX - NODE_RADIUS - BOX_PADDING,
+                        minY - NODE_RADIUS - BOX_PADDING,
+                        maxX + NODE_RADIUS + BOX_PADDING,
+                        maxY + NODE_RADIUS + BOX_PADDING
+                );
+                canvas.drawRoundRect(box, 24f, 24f, boxPaint);
+                canvas.drawText("B" + tree.getDegree(),
+                        box.left + 12f,
+                        box.top + boxLabelPaint.getTextSize() + 4f,
+                        boxLabelPaint);
+            }
+            tree = tree.getSibling();
+        }
+
         drawEdges(canvas, heapHead);
         drawNodes(canvas, heapHead);
         canvas.restore();
@@ -169,11 +236,9 @@ public class BinomialHeapView extends View {
             canvas.drawCircle(pos[0], pos[1], NODE_RADIUS, nodePaint);
 
             textPaint.setColor(Color.WHITE);
-            String label = "s:" + n.score;
-            canvas.drawText(label, pos[0], pos[1] - 8f, textPaint);
-            String name = n.outfit.getName();
-            if (name.length() > 8) name = name.substring(0, 7) + "…";
-            canvas.drawText(name, pos[0], pos[1] + 16f, textPaint);
+            String label = outfitLabels.getOrDefault(n, "?");
+            canvas.drawText(label, pos[0], pos[1] - 6f, textPaint);
+            canvas.drawText("s:" + n.score, pos[0], pos[1] + 22f, textPaint);
         }
         drawNodes(canvas, n.getChild());
         drawNodes(canvas, n.getSibling());
