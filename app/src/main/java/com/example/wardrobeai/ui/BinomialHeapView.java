@@ -1,5 +1,8 @@
 package com.example.wardrobeai.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,6 +13,7 @@ import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.animation.OvershootInterpolator;
 
 import com.example.wardrobeai.data.ClothingItem;
 import com.example.wardrobeai.logic.BinomialHeap;
@@ -21,40 +25,32 @@ import java.util.Map;
 
 public class BinomialHeapView extends View {
 
-    public interface OnNodeTappedListener {
-        void onNodeTapped(String title, String details);
-    }
-
-    private OnNodeTappedListener listener;
-
-    public void setOnNodeTappedListener(OnNodeTappedListener l) {
-        this.listener = l;
-    }
-
-    private final BinomialHeap.Node heapHead;
-    private final Paint nodePaint   = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint edgePaint   = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint textPaint   = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint boxPaint    = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint boxLabelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-    private static final float NODE_RADIUS  = 60f;
+    private static final float NODE_RADIUS = 60f;
     private static final float LEVEL_HEIGHT = 160f;
     private static final float TREE_SPACING = 120f;
-    private static final float BOX_PADDING  = 40f;
-    private static final float TAP_SLOP     = 10f;
-
-
+    private static final float BOX_PADDING = 40f;
+    private static final float TAP_SLOP = 10f;
+    private final BinomialHeap.Node heapHead;
+    private final Paint nodePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint edgePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint boxPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint boxLabelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint ringPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Matrix matrix = new Matrix();
+    private final Map<BinomialHeap.Node, float[]> positions = new HashMap<>();
+    private final Map<BinomialHeap.Node, String> outfitLabels = new HashMap<>();
+    private OnNodeTappedListener listener;
     private float lastTouchX, lastTouchY;
     private float downX, downY;
     private ScaleGestureDetector scaleDetector;
-
-    private final Map<BinomialHeap.Node, float[]> positions = new HashMap<>();
-
-    // outfit index label map: node -> "#1", "#2" ...
-    private final Map<BinomialHeap.Node, String> outfitLabels = new HashMap<>();
-
+    private float animProgress = 0f;
+    private boolean animationStarted = false;
+    private ValueAnimator entryAnimator;
+    private BinomialHeap.Node selectedNode = null;
+    private BinomialHeap.Node pulsingNode = null;
+    private float pulseScale = 1f;
+    private ValueAnimator pulseAnimator;
     public BinomialHeapView(Context context, BinomialHeap heap) {
         super(context);
         this.heapHead = heap.getHead();
@@ -77,7 +73,10 @@ public class BinomialHeapView extends View {
         boxLabelPaint.setTextAlign(Paint.Align.LEFT);
         boxLabelPaint.setFakeBoldText(true);
 
-        // assign index labels to all nodes in insertion order (root list first)
+        ringPaint.setStyle(Paint.Style.STROKE);
+        ringPaint.setColor(Color.rgb(255, 210, 40));
+        ringPaint.setStrokeWidth(6f);
+
         int[] counter = {1};
         assignLabels(heapHead, counter);
 
@@ -121,11 +120,32 @@ public class BinomialHeapView extends View {
         });
     }
 
+    public void setOnNodeTappedListener(OnNodeTappedListener l) {
+        this.listener = l;
+    }
+
+    public void clearSelection() {
+        selectedNode = null;
+        invalidate();
+    }
+
     private void assignLabels(BinomialHeap.Node n, int[] counter) {
         if (n == null) return;
         outfitLabels.put(n, "#" + counter[0]++);
         assignLabels(n.getChild(), counter);
         assignLabels(n.getSibling(), counter);
+    }
+
+    private void startEntryAnimation() {
+        animationStarted = true;
+        entryAnimator = ValueAnimator.ofFloat(0f, 1f);
+        entryAnimator.setDuration(700);
+        entryAnimator.setInterpolator(new OvershootInterpolator(0.6f));
+        entryAnimator.addUpdateListener(a -> {
+            animProgress = (float) a.getAnimatedValue();
+            invalidate();
+        });
+        entryAnimator.start();
     }
 
     private void handleTap(float screenX, float screenY) {
@@ -142,6 +162,8 @@ public class BinomialHeapView extends View {
             float dy = canvasY - pos[1];
             if (Math.sqrt(dx * dx + dy * dy) <= NODE_RADIUS && listener != null) {
                 BinomialHeap.Node node = entry.getKey();
+                selectedNode = node;
+                startPulse(node);
                 String label = outfitLabels.getOrDefault(node, "?");
                 listener.onNodeTapped(label, buildDetails(node));
                 return;
@@ -149,9 +171,30 @@ public class BinomialHeapView extends View {
         }
     }
 
+    private void startPulse(BinomialHeap.Node node) {
+        if (pulseAnimator != null) pulseAnimator.cancel();
+        pulsingNode = node;
+        pulseAnimator = ValueAnimator.ofFloat(1f, 1.4f, 1f);
+        pulseAnimator.setDuration(300);
+        pulseAnimator.addUpdateListener(a -> {
+            pulseScale = (float) a.getAnimatedValue();
+            invalidate();
+        });
+        pulseAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                pulsingNode = null;
+                pulseScale = 1f;
+                invalidate();
+            }
+        });
+        pulseAnimator.start();
+    }
+
     private String colorName(String hex) {
         for (com.example.wardrobeai.data.ClothingColor c : com.example.wardrobeai.data.ClothingColor.values()) {
-            if (c.getHex().equalsIgnoreCase(hex)) return c.name().charAt(0) + c.name().substring(1).toLowerCase();
+            if (c.getHex().equalsIgnoreCase(hex))
+                return c.name().charAt(0) + c.name().substring(1).toLowerCase();
         }
         return hex;
     }
@@ -159,7 +202,7 @@ public class BinomialHeapView extends View {
     private String buildDetails(BinomialHeap.Node node) {
         List<ClothingItem> outfitItems = node.outfit.getItems();
         int itemCount = outfitItems.size();
-        int maxScore  = itemCount * (itemCount - 1) / 2; // C(n,2)
+        int maxScore = itemCount * (itemCount - 1) / 2;
 
         StringBuilder sb = new StringBuilder();
         sb.append("Outfit ").append(outfitLabels.getOrDefault(node, "?"))
@@ -173,7 +216,8 @@ public class BinomialHeapView extends View {
         }
 
         sb.append(" This is a B").append(node.getDegree())
-                .append(" binomial tree, meaning it has ").append((int) Math.pow(2, node.getDegree()))
+                .append(" binomial tree, meaning it has ")
+                .append((int) Math.pow(2, node.getDegree()))
                 .append(" node(s) in its subtree.\n\n");
 
         sb.append("Items:\n");
@@ -201,6 +245,8 @@ public class BinomialHeapView extends View {
         }
         matrix.reset();
         matrix.postTranslate(0, NODE_RADIUS + BOX_PADDING + 40);
+
+        if (!animationStarted) startEntryAnimation();
     }
 
     private int treeWidth(BinomialHeap.Node n) {
@@ -237,7 +283,6 @@ public class BinomialHeapView extends View {
         return childX;
     }
 
-    // collect all positions within a single tree (children only, not siblings)
     private void collectTreePositions(BinomialHeap.Node n, List<float[]> out) {
         if (n == null) return;
         float[] pos = positions.get(n);
@@ -260,7 +305,11 @@ public class BinomialHeapView extends View {
         canvas.save();
         canvas.concat(matrix);
 
-        // draw bounding boxes per tree
+        // bounding boxes fade in with animProgress
+        int boxAlpha = (int) (animProgress * 255);
+        boxPaint.setAlpha(boxAlpha);
+        boxLabelPaint.setAlpha(boxAlpha);
+
         BinomialHeap.Node tree = heapHead;
         while (tree != null) {
             List<float[]> treePositions = new ArrayList<>();
@@ -289,6 +338,7 @@ public class BinomialHeapView extends View {
             tree = tree.getSibling();
         }
 
+        edgePaint.setAlpha((int) (animProgress * 255));
         drawEdges(canvas, heapHead);
         drawNodes(canvas, heapHead);
         canvas.restore();
@@ -310,23 +360,39 @@ public class BinomialHeapView extends View {
 
     private void drawNodes(Canvas canvas, BinomialHeap.Node n) {
         if (n == null) return;
+
         float[] pos = positions.get(n);
         if (pos != null) {
+            float r = NODE_RADIUS * animProgress;
+            if (n == pulsingNode) r *= pulseScale;
+
+            // yellow selection ring
+            if (n == selectedNode) {
+                canvas.drawCircle(pos[0], pos[1], r + 10f, ringPaint);
+            }
+
             nodePaint.setStyle(Paint.Style.FILL);
             nodePaint.setColor(Color.rgb(60, 100, 180));
-            canvas.drawCircle(pos[0], pos[1], NODE_RADIUS, nodePaint);
+            canvas.drawCircle(pos[0], pos[1], r, nodePaint);
 
             nodePaint.setStyle(Paint.Style.STROKE);
             nodePaint.setColor(Color.WHITE);
             nodePaint.setStrokeWidth(2f);
-            canvas.drawCircle(pos[0], pos[1], NODE_RADIUS, nodePaint);
+            canvas.drawCircle(pos[0], pos[1], r, nodePaint);
 
-            textPaint.setColor(Color.WHITE);
-            String label = outfitLabels.getOrDefault(n, "?");
-            canvas.drawText(label, pos[0], pos[1] - 6f, textPaint);
-            canvas.drawText("s:" + n.score, pos[0], pos[1] + 22f, textPaint);
+            if (animProgress > 0.5f) {
+                textPaint.setColor(Color.WHITE);
+                String label = outfitLabels.getOrDefault(n, "?");
+                canvas.drawText(label, pos[0], pos[1] - 6f, textPaint);
+                canvas.drawText("s:" + n.score, pos[0], pos[1] + 22f, textPaint);
+            }
         }
+
         drawNodes(canvas, n.getChild());
         drawNodes(canvas, n.getSibling());
+    }
+
+    public interface OnNodeTappedListener {
+        void onNodeTapped(String title, String details);
     }
 }

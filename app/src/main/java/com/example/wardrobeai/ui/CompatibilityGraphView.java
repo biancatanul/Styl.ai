@@ -1,5 +1,8 @@
 package com.example.wardrobeai.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -8,43 +11,39 @@ import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.animation.OvershootInterpolator;
 
 import com.example.wardrobeai.data.ClothingItem;
 import com.example.wardrobeai.logic.CompatibilityGraph;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
 
 public class CompatibilityGraphView extends View {
 
-    public interface OnNodeTappedListener {
-        void onNodeTapped(String title, String details);
-    }
-
-    private OnNodeTappedListener listener;
-
-    public void setOnNodeTappedListener(OnNodeTappedListener l) {
-        this.listener = l;
-    }
-
+    private static final float NODE_RADIUS = 60f;
+    private static final float TAP_SLOP = 10f;
     private final List<ClothingItem> items;
     private final CompatibilityGraph graph;
     private final Map<String, float[]> positions = new HashMap<>();
-
     private final Paint nodePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint edgePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-    private static final float NODE_RADIUS = 60f;
-    private static final float TAP_SLOP    = 10f;
-
+    private final Paint ringPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Matrix matrix = new Matrix();
+    private OnNodeTappedListener listener;
     private float lastTouchX, lastTouchY;
     private float downX, downY;
     private ScaleGestureDetector scaleDetector;
-
+    private float animProgress = 0f;
+    private boolean animationStarted = false;
+    private ValueAnimator entryAnimator;
+    private String selectedId = null;  // item ID of the selected node
+    private String pulsingId = null;
+    private float pulseScale = 1f;
+    private ValueAnimator pulseAnimator;
     public CompatibilityGraphView(Context context, List<ClothingItem> items, CompatibilityGraph graph) {
         super(context);
         this.items = items;
@@ -57,6 +56,10 @@ public class CompatibilityGraphView extends View {
         textPaint.setTextSize(24f);
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setColor(Color.WHITE);
+
+        ringPaint.setStyle(Paint.Style.STROKE);
+        ringPaint.setColor(Color.rgb(255, 210, 40));
+        ringPaint.setStrokeWidth(6f);
 
         scaleDetector = new ScaleGestureDetector(context,
                 new ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -98,6 +101,27 @@ public class CompatibilityGraphView extends View {
         });
     }
 
+    public void setOnNodeTappedListener(OnNodeTappedListener l) {
+        this.listener = l;
+    }
+
+    public void clearSelection() {
+        selectedId = null;
+        invalidate();
+    }
+
+    private void startEntryAnimation() {
+        animationStarted = true;
+        entryAnimator = ValueAnimator.ofFloat(0f, 1f);
+        entryAnimator.setDuration(700);
+        entryAnimator.setInterpolator(new OvershootInterpolator(0.6f));
+        entryAnimator.addUpdateListener(a -> {
+            animProgress = (float) a.getAnimatedValue();
+            invalidate();
+        });
+        entryAnimator.start();
+    }
+
     private void handleTap(float screenX, float screenY) {
         Matrix inverse = new Matrix();
         matrix.invert(inverse);
@@ -112,15 +136,58 @@ public class CompatibilityGraphView extends View {
             float dx = canvasX - pos[0];
             float dy = canvasY - pos[1];
             if (Math.sqrt(dx * dx + dy * dy) <= NODE_RADIUS && listener != null) {
+                selectedId = item.getId();
+                startPulse(item.getId());
                 listener.onNodeTapped(item.getName(), buildDetails(item));
                 return;
             }
         }
     }
 
+    private void startPulse(String itemId) {
+        if (pulseAnimator != null) pulseAnimator.cancel();
+        pulsingId = itemId;
+        pulseAnimator = ValueAnimator.ofFloat(1f, 1.4f, 1f);
+        pulseAnimator.setDuration(300);
+        pulseAnimator.addUpdateListener(a -> {
+            pulseScale = (float) a.getAnimatedValue();
+            invalidate();
+        });
+        pulseAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                pulsingId = null;
+                pulseScale = 1f;
+                invalidate();
+            }
+        });
+        pulseAnimator.start();
+    }
+
+    private int nodeColor(ClothingItem item) {
+        if (item.getColors() != null && !item.getColors().isEmpty()) {
+            String hex = item.getColors().get(0);
+            try {
+                // ClothingColor hex values already include '#', e.g. "#ff2626"
+                return Color.parseColor(hex);
+            } catch (IllegalArgumentException ignored) {
+                // malformed hex -- fall through to default
+            }
+        }
+        return Color.rgb(30, 140, 100);
+    }
+
+    private int textColorFor(int bgColor) {
+        double luminance = (0.299 * Color.red(bgColor)
+                + 0.587 * Color.green(bgColor)
+                + 0.114 * Color.blue(bgColor)) / 255.0;
+        return luminance > 0.5 ? Color.BLACK : Color.WHITE;
+    }
+
     private String colorName(String hex) {
         for (com.example.wardrobeai.data.ClothingColor c : com.example.wardrobeai.data.ClothingColor.values()) {
-            if (c.getHex().equalsIgnoreCase(hex)) return c.name().charAt(0) + c.name().substring(1).toLowerCase();
+            if (c.getHex().equalsIgnoreCase(hex))
+                return c.name().charAt(0) + c.name().substring(1).toLowerCase();
         }
         return hex;
     }
@@ -142,7 +209,6 @@ public class CompatibilityGraphView extends View {
                 + item.getStyle().name().substring(1).toLowerCase();
         String colors = colorList(item.getColors());
 
-        // check if neutral
         boolean isNeutral = false;
         for (String hex : item.getColors()) {
             String name = colorName(hex).toLowerCase();
@@ -160,8 +226,7 @@ public class CompatibilityGraphView extends View {
             sb.append("Its neutral color means it pairs with almost any item regardless of style. ");
         }
 
-        sb.append("It is compatible with ").append(neighborCount)
-                .append(" item(s) in your wardrobe.");
+        sb.append("It is compatible with ").append(neighborCount).append(" item(s) in your wardrobe.");
 
         if (neighborIds != null && !neighborIds.isEmpty()) {
             sb.append("\n\nCompatible with:\n");
@@ -186,7 +251,6 @@ public class CompatibilityGraphView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         if (items.isEmpty()) return;
 
-        // place nodes evenly around a circle
         float cx = w / 2f;
         float cy = h / 2f;
         float radius = Math.min(w, h) / 2f - NODE_RADIUS - 40f;
@@ -199,6 +263,7 @@ public class CompatibilityGraphView extends View {
         }
 
         matrix.reset();
+        if (!animationStarted) startEntryAnimation();
     }
 
     @Override
@@ -213,7 +278,8 @@ public class CompatibilityGraphView extends View {
         canvas.save();
         canvas.concat(matrix);
 
-        // draw edges first
+        // edges
+        edgePaint.setAlpha((int) (animProgress * 255));
         Map<String, List<String>> adjacency = graph.getAdjacencyList();
         for (ClothingItem item : items) {
             float[] from = positions.get(item.getId());
@@ -223,32 +289,47 @@ public class CompatibilityGraphView extends View {
             for (String neighborId : neighbors) {
                 float[] to = positions.get(neighborId);
                 if (to == null) continue;
-                // only draw each edge once
                 if (item.getId().compareTo(neighborId) < 0)
                     canvas.drawLine(from[0], from[1], to[0], to[1], edgePaint);
             }
         }
 
-        // draw nodes on top
+        // nodes
         for (ClothingItem item : items) {
             float[] pos = positions.get(item.getId());
             if (pos == null) continue;
 
+            float r = NODE_RADIUS * animProgress;
+            if (item.getId().equals(pulsingId)) r *= pulseScale;
+
+            // yellow selection ring
+            if (item.getId().equals(selectedId)) {
+                canvas.drawCircle(pos[0], pos[1], r + 10f, ringPaint);
+            }
+
+            int fillColor = nodeColor(item);
+
             nodePaint.setStyle(Paint.Style.FILL);
-            nodePaint.setColor(Color.rgb(30, 140, 100));
-            canvas.drawCircle(pos[0], pos[1], NODE_RADIUS, nodePaint);
+            nodePaint.setColor(fillColor);
+            canvas.drawCircle(pos[0], pos[1], r, nodePaint);
 
             nodePaint.setStyle(Paint.Style.STROKE);
             nodePaint.setColor(Color.WHITE);
             nodePaint.setStrokeWidth(2f);
-            canvas.drawCircle(pos[0], pos[1], NODE_RADIUS, nodePaint);
+            canvas.drawCircle(pos[0], pos[1], r, nodePaint);
 
-            String name = item.getName();
-            if (name.length() > 8) name = name.substring(0, 7) + "…";
-            textPaint.setColor(Color.WHITE);
-            canvas.drawText(name, pos[0], pos[1] + 8f, textPaint);
+            if (animProgress > 0.5f) {
+                textPaint.setColor(textColorFor(fillColor));
+                String name = item.getName();
+                if (name.length() > 8) name = name.substring(0, 7) + "…";
+                canvas.drawText(name, pos[0], pos[1] + 8f, textPaint);
+            }
         }
 
         canvas.restore();
+    }
+
+    public interface OnNodeTappedListener {
+        void onNodeTapped(String title, String details);
     }
 }

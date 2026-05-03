@@ -30,13 +30,16 @@ public class DataStructuresActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data_structures);
 
-        container       = findViewById(R.id.visualizationContainer);
+        container = findViewById(R.id.visualizationContainer);
         nodeDetailPanel = findViewById(R.id.nodeDetailPanel);
         nodeDetailTitle = findViewById(R.id.nodeDetailTitle);
-        nodeDetailBody  = findViewById(R.id.nodeDetailBody);
+        nodeDetailBody = findViewById(R.id.nodeDetailBody);
 
-        findViewById(R.id.nodeDetailDismiss).setOnClickListener(v ->
-                nodeDetailPanel.setVisibility(View.GONE));
+        findViewById(R.id.nodeDetailDismiss).setOnClickListener(v -> {
+            nodeDetailPanel.setVisibility(View.GONE);
+            clearCurrentSelection();
+        });
+
         buildStructures();
 
         String[] options = {"Red-Black Tree", "Binomial Heap", "Compatibility Graph"};
@@ -58,6 +61,14 @@ public class DataStructuresActivity extends AppCompatActivity {
         });
 
         setupBottomNav();
+    }
+
+    private void clearCurrentSelection() {
+        if (container.getChildCount() == 0) return;
+        View v = container.getChildAt(0);
+        if (v instanceof RedBlackTreeView) ((RedBlackTreeView) v).clearSelection();
+        if (v instanceof BinomialHeapView) ((BinomialHeapView) v).clearSelection();
+        if (v instanceof CompatibilityGraphView) ((CompatibilityGraphView) v).clearSelection();
     }
 
     private void showPanel(String title, String details) {
@@ -96,6 +107,7 @@ public class DataStructuresActivity extends AppCompatActivity {
 
     private void showView(int position) {
         container.removeAllViews();
+        nodeDetailPanel.setVisibility(View.GONE);
         switch (position) {
             case 0: {
                 RedBlackTreeView view = new RedBlackTreeView(this, rbt);
@@ -141,7 +153,6 @@ public class DataStructuresActivity extends AppCompatActivity {
         });
     }
 
-    // currentTabIndex for DataStructuresActivity is 3
     private void navigateTo(Class<?> target, int targetIndex) {
         Intent intent = new Intent(this, target);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
