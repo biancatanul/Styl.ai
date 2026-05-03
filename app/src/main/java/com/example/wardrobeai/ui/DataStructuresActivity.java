@@ -75,6 +75,12 @@ public class DataStructuresActivity extends AppCompatActivity {
         nodeDetailTitle.setText(title);
         nodeDetailBody.setText(details);
         nodeDetailPanel.setVisibility(View.VISIBLE);
+        nodeDetailPanel.post(() -> {
+            View v = container.getChildAt(0);
+            if (v instanceof RedBlackTreeView)       ((RedBlackTreeView)       v).executePendingCenter();
+            if (v instanceof BinomialHeapView)       ((BinomialHeapView)       v).executePendingCenter();
+            if (v instanceof CompatibilityGraphView) ((CompatibilityGraphView) v).executePendingCenter();
+        });
     }
 
     private void buildStructures() {
