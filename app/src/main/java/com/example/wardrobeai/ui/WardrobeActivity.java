@@ -73,7 +73,7 @@ public class WardrobeActivity extends AppCompatActivity {
             @Override
             public void onDelete(ClothingItem item) {
                 WardrobeRepository.getInstance().removeItem(item.getId());
-                adapter.notifyDataSetChanged();
+                applyFilters();
             }
         });
         recyclerView.setAdapter(adapter);
