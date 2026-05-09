@@ -134,7 +134,29 @@ public class OutfitAdapter extends RecyclerView.Adapter<OutfitAdapter.OutfitView
                 }
                 return true;
             });
+
             popup.show();
+        });
+        // Tap card to see reasoning (AI outfits only)
+        holder.itemView.setOnClickListener(v -> {
+            String reasoning = outfit.getReasoning();
+            if (outfit.isAIGenerated() && reasoning != null && !reasoning.isEmpty()) {
+                TextView tv = new TextView(v.getContext());
+                tv.setText(reasoning);
+                tv.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(
+                        v.getContext(), R.font.elms_sans));
+                tv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 14);
+                tv.setTextColor(androidx.core.content.ContextCompat.getColor(
+                        v.getContext(), R.color.text_dark));
+                int pad = (int)(20 * v.getContext().getResources().getDisplayMetrics().density);
+                tv.setPadding(pad, pad, pad, pad);
+
+                new androidx.appcompat.app.AlertDialog.Builder(v.getContext())
+                        .setTitle("Why this outfit?")
+                        .setView(tv)
+                        .setPositiveButton("Got it", null)
+                        .show();
+            }
         });
     }
 

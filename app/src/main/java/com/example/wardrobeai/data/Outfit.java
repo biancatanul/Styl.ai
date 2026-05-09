@@ -8,6 +8,7 @@ public class Outfit {
     private String name;
     private List<ClothingItem> items;
     private boolean isAIGenerated;
+    private String reasoning;
 
     public Outfit(String name, List<ClothingItem> items, boolean isAIGenerated) {
         this.id = java.util.UUID.randomUUID().toString();
@@ -31,6 +32,9 @@ public class Outfit {
     public boolean isAIGenerated() {
         return isAIGenerated;
     }
+    public String getReasoning() { return reasoning; }
+    public void setReasoning(String reasoning) { this.reasoning = reasoning; }
+
 
     @Override
     public String toString() {

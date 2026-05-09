@@ -123,16 +123,25 @@ public class AiActivity extends AppCompatActivity {
     }
 
     private void displayOutfit() {
+        Outfit current = suggestions.get(currentIndex);
         suggestionIndexText.setText("Suggestion " + (currentIndex + 1) + " of " + suggestions.size());
         itemsLayout.removeAllViews();
-        for (ClothingItem item : suggestions.get(currentIndex).getItems()) {
+
+        StringBuilder fullReasoning = new StringBuilder();
+        for (ClothingItem item : current.getItems()) {
+            String itemReasoning = generateReasoning(item);
             TextView tv = new TextView(this);
             tv.setTypeface(ResourcesCompat.getFont(this, R.font.elms_sans));
-            tv.setText(item.getName() + "\n" + generateReasoning(item));
+            tv.setText(item.getName() + "\n" + itemReasoning);
             tv.setPadding(0, 12, 0, 12);
             tv.setTextColor(getColor(R.color.text_dark));
             itemsLayout.addView(tv);
+
+            fullReasoning.append(item.getName())
+                    .append(" (").append(item.getCategory().name()).append(")")
+                    .append("\n").append(itemReasoning).append("\n\n");
         }
+        current.setReasoning(fullReasoning.toString().trim());
     }
 
     private String generateReasoning(ClothingItem item) {
