@@ -16,7 +16,7 @@ import com.example.wardrobeai.data.Outfit;
 import com.example.wardrobeai.data.WardrobeRepository;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class OutfitsActivity extends AppCompatActivity {
 
@@ -26,10 +26,7 @@ public class OutfitsActivity extends AppCompatActivity {
     ActivityResultLauncher<Intent> editOutfitLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    adapter.notifyDataSetChanged();
-                    updateEmptyState(emptyText, WardrobeRepository.getInstance().getAllOutfits());
-                }
+                if (result.getResultCode() == RESULT_OK) refreshOutfits();
             }
     );
 
@@ -40,9 +37,9 @@ public class OutfitsActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.recyclerViewOutfits);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        List<Outfit> outfits = WardrobeRepository.getInstance().getAllOutfits();
+        emptyText = findViewById(R.id.textEmptyOutfits);
 
-        adapter = new OutfitAdapter(outfits, new OutfitAdapter.OutfitMenuListener() {
+        adapter = new OutfitAdapter(new ArrayList<>(), new OutfitAdapter.OutfitMenuListener() {
             @Override
             public void onEdit(Outfit outfit) {
                 Intent intent = new Intent(OutfitsActivity.this, BuildOutfitActivity.class);
@@ -51,26 +48,34 @@ public class OutfitsActivity extends AppCompatActivity {
             }
             @Override
             public void onDelete(Outfit outfit) {
-                WardrobeRepository.getInstance().removeOutfit(outfit.getId());
-                adapter.notifyDataSetChanged();
-                updateEmptyState(emptyText, WardrobeRepository.getInstance().getAllOutfits());
+                WardrobeRepository.getInstance(OutfitsActivity.this).removeOutfit(outfit.getId());
+                refreshOutfits();
             }
         });
         recyclerView.setAdapter(adapter);
+        refreshOutfits();
 
-        com.google.android.material.floatingactionbutton.FloatingActionButton fabAdd = findViewById(R.id.buttonAddOutfit);
-        emptyText = findViewById(R.id.textEmptyOutfits);
-
+        com.google.android.material.floatingactionbutton.FloatingActionButton fabAdd =
+                findViewById(R.id.buttonAddOutfit);
         fabAdd.setOnClickListener(v ->
                 editOutfitLauncher.launch(new Intent(this, BuildOutfitActivity.class)));
-
-        updateEmptyState(emptyText, outfits);
 
         setupBottomNav();
     }
 
-    private void updateEmptyState(TextView emptyText, List<Outfit> outfits) {
-        emptyText.setVisibility(outfits.isEmpty() ? View.VISIBLE : View.GONE);
+    private void refreshOutfits() {
+        WardrobeRepository.getInstance(this).getAllOutfits(outfits -> {
+            adapter.updateOutfits(outfits);
+            emptyText.setVisibility(outfits.isEmpty() ? View.VISIBLE : View.GONE);
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshOutfits();
+        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
+        nav.setSelectedItemId(R.id.nav_outfits);
     }
     private void setupBottomNav() {
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
@@ -92,12 +97,4 @@ public class OutfitsActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        adapter.notifyDataSetChanged();
-        updateEmptyState(emptyText, WardrobeRepository.getInstance().getAllOutfits());
-        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
-        nav.setSelectedItemId(R.id.nav_outfits);
-    }
 }

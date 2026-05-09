@@ -12,7 +12,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wardrobeai.R;
@@ -26,17 +25,16 @@ public class WardrobeActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private WardrobeAdapter adapter;
+
     ActivityResultLauncher<Intent> addItemLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == RESULT_OK)
-                    adapter.notifyDataSetChanged();
+                    refreshItems();
             }
     );
 
-    // buttonAddItem is now a FAB — View is safe for all click operations
     private View buttonAddItem;
-    // these are gone from the layout (visibility=gone) but still found by findViewById
     private View buttonBuildOutfit, buttonViewOutfits, buttonAiSuggest, buttonDataStructures;
     private View buttonFilter;
     private EditText editTextSearch;
@@ -52,18 +50,19 @@ public class WardrobeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wardrobe);
 
-        recyclerView      = findViewById(R.id.recyclerViewWardrobe);
-        buttonAddItem     = findViewById(R.id.buttonAddItem);
-        buttonBuildOutfit = findViewById(R.id.buttonBuildOutfit);
-        buttonViewOutfits = findViewById(R.id.buttonViewOutfits);
-        buttonAiSuggest   = findViewById(R.id.buttonAiSuggest);
+        recyclerView         = findViewById(R.id.recyclerViewWardrobe);
+        buttonAddItem        = findViewById(R.id.buttonAddItem);
+        buttonBuildOutfit    = findViewById(R.id.buttonBuildOutfit);
+        buttonViewOutfits    = findViewById(R.id.buttonViewOutfits);
+        buttonAiSuggest      = findViewById(R.id.buttonAiSuggest);
         buttonDataStructures = findViewById(R.id.buttonDataStructures);
-        editTextSearch    = findViewById(R.id.editTextSearch);
-        buttonFilter      = findViewById(R.id.buttonFilter);
+        editTextSearch       = findViewById(R.id.editTextSearch);
+        buttonFilter         = findViewById(R.id.buttonFilter);
 
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        List<ClothingItem> items = WardrobeRepository.getInstance().getAllItems();
-        adapter = new WardrobeAdapter(items, new WardrobeAdapter.ItemMenuListener() {
+
+        // Start with empty list; refreshItems() will populate it
+        adapter = new WardrobeAdapter(new ArrayList<>(), new WardrobeAdapter.ItemMenuListener() {
             @Override
             public void onEdit(ClothingItem item) {
                 Intent intent = new Intent(WardrobeActivity.this, AddItemActivity.class);
@@ -72,11 +71,12 @@ public class WardrobeActivity extends AppCompatActivity {
             }
             @Override
             public void onDelete(ClothingItem item) {
-                WardrobeRepository.getInstance().removeItem(item.getId());
-                applyFilters();
+                WardrobeRepository.getInstance(WardrobeActivity.this).removeItem(item.getId());
+                refreshItems();
             }
         });
         recyclerView.setAdapter(adapter);
+        refreshItems();
 
         editTextSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -85,18 +85,15 @@ public class WardrobeActivity extends AppCompatActivity {
         });
 
         buttonFilter.setOnClickListener(v -> showFilterDialog());
-
         buttonAddItem.setOnClickListener(v ->
                 addItemLauncher.launch(new Intent(this, AddItemActivity.class)));
 
-        // these are invisible in the layout — kept so old click logic doesn't crash
         buttonBuildOutfit.setOnClickListener(v -> navigateTo(BuildOutfitActivity.class, 1));
         buttonViewOutfits.setOnClickListener(v -> navigateTo(OutfitsActivity.class, 2));
         buttonAiSuggest.setOnClickListener(v -> navigateTo(AiActivity.class, 3));
         buttonDataStructures.setOnClickListener(v -> navigateTo(DataStructuresActivity.class, 4));
 
         com.google.android.material.chip.ChipGroup chipGroup = findViewById(R.id.chipGroupFilter);
-
         com.google.android.material.chip.Chip allChip = new com.google.android.material.chip.Chip(this);
         allChip.setText("ALL ITEMS");
         allChip.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.elms_sans));
@@ -118,11 +115,8 @@ public class WardrobeActivity extends AppCompatActivity {
                 com.google.android.material.chip.Chip c = group.findViewById(id);
                 if (c == null) continue;
                 String label = c.getText().toString();
-                try {
-                    filterOccasions.add(Occasion.valueOf(label));
-                } catch (IllegalArgumentException ignored) {
-                    // "ALL ITEMS" chip — no occasion filter
-                }
+                try { filterOccasions.add(Occasion.valueOf(label)); }
+                catch (IllegalArgumentException ignored) {}
             }
             applyFilters();
         });
@@ -130,6 +124,25 @@ public class WardrobeActivity extends AppCompatActivity {
         setupBottomNav();
     }
 
+    private void refreshItems() {
+        WardrobeRepository.getInstance(this).getAllItems(items -> {
+            adapter.updateItems(items);
+            applyFilters();
+        });
+    }
+
+    private void applyFilters() {
+        String query = editTextSearch.getText().toString();
+        adapter.applyFilters(query, filterCategories, filterStyles, filterSeasons, filterOccasions, filterColorHexes);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshItems();
+        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
+        nav.setSelectedItemId(R.id.nav_wardrobe);
+    }
 
     private void setupBottomNav() {
         BottomNavigationView nav = findViewById(R.id.bottomNavigation);
@@ -218,18 +231,5 @@ public class WardrobeActivity extends AppCompatActivity {
         new AlertDialog.Builder(this).setTitle("Color")
                 .setMultiChoiceItems(names, checked, (d, which, isChecked) -> { if (isChecked) filterColorHexes.add(values[which].getHex()); else filterColorHexes.remove(values[which].getHex()); })
                 .setPositiveButton("OK", (d, w) -> applyFilters()).show();
-    }
-
-    private void applyFilters() {
-        String query = editTextSearch.getText().toString();
-        adapter.applyFilters(query, filterCategories, filterStyles, filterSeasons, filterOccasions, filterColorHexes);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        adapter.notifyDataSetChanged();
-        BottomNavigationView nav = findViewById(R.id.bottomNavigation);
-        nav.setSelectedItemId(R.id.nav_wardrobe);
     }
 }

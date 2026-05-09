@@ -41,8 +41,10 @@ public class AiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ai);
 
-        repo  = WardrobeRepository.getInstance();
-        graph = repo.buildCompatibilityGraph();
+        repo = WardrobeRepository.getInstance(this);
+        repo.buildCompatibilityGraph(g -> {
+            graph = g;
+        });
 
         occasionSpinner     = findViewById(R.id.occasionSpinner);
         seasonSpinner       = findViewById(R.id.seasonSpinner);
@@ -72,18 +74,20 @@ public class AiActivity extends AppCompatActivity {
             selectedSeason   = (Season)   seasonSpinner.getSelectedItem();
             selectedStyle    = (Style)    styleSpinner.getSelectedItem();
 
-            CSPSolver solver = new CSPSolver(repo.getAllItems(), graph);
-            List<Outfit> candidates = solver.suggestOutfits(selectedStyle, selectedSeason, selectedOccasion, 10);
+            repo.getAllItems(items -> {
+                CSPSolver solver = new CSPSolver(items, graph);
+                List<Outfit> candidates = solver.suggestOutfits(selectedStyle, selectedSeason, selectedOccasion, 10);
 
-            if (candidates.isEmpty()) {
-                Toast.makeText(this, "No outfits found for these filters", Toast.LENGTH_SHORT).show();
-            } else {
-                BinomialHeap heap = BinomialHeap.fromOutfits(candidates, graph);
-                suggestions  = heap.drainSorted();
-                currentIndex = 0;
-                resultsLayout.setVisibility(View.VISIBLE);
-                displayOutfit();
-            }
+                if (candidates.isEmpty()) {
+                    Toast.makeText(this, "No outfits found for these filters", Toast.LENGTH_SHORT).show();
+                } else {
+                    BinomialHeap heap = BinomialHeap.fromOutfits(candidates, graph);
+                    suggestions  = heap.drainSorted();
+                    currentIndex = 0;
+                    resultsLayout.setVisibility(View.VISIBLE);
+                    displayOutfit();
+                }
+            });
         });
 
         prevButton.setOnClickListener(v -> {

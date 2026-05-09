@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -151,9 +152,14 @@ public class OutfitAdapter extends RecyclerView.Adapter<OutfitAdapter.OutfitView
                 int pad = (int)(20 * v.getContext().getResources().getDisplayMetrics().density);
                 tv.setPadding(pad, pad, pad, pad);
 
+                ScrollView scrollView = new ScrollView(v.getContext());
+                scrollView.addView(tv);
+                int maxHeight = (int) (v.getContext().getResources().getDisplayMetrics().heightPixels * 0.6);
+                scrollView.setLayoutParams(new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, maxHeight));
                 new androidx.appcompat.app.AlertDialog.Builder(v.getContext())
                         .setTitle("Why this outfit?")
-                        .setView(tv)
+                        .setView(scrollView)
                         .setPositiveButton("Got it", null)
                         .show();
             }
@@ -163,6 +169,11 @@ public class OutfitAdapter extends RecyclerView.Adapter<OutfitAdapter.OutfitView
     @Override
     public int getItemCount() { return outfits.size(); }
 
+    public void updateOutfits(List<Outfit> newOutfits) {
+        outfits.clear();
+        outfits.addAll(newOutfits);
+        notifyDataSetChanged();
+    }
     static class OutfitViewHolder extends RecyclerView.ViewHolder {
         TextView textOutfitName, textAITag;
         LinearLayout itemTilesContainer;

@@ -63,39 +63,39 @@ public class AddItemActivity extends AppCompatActivity {
         // check if we're in edit mode
         editItemId = getIntent().getStringExtra("edit_item_id");
         if (editItemId != null) {
-            ClothingItem existing = WardrobeRepository.getInstance().getItemById(editItemId);
-            if (existing != null) {
-                editTextItemName.setText(existing.getName());
+            WardrobeRepository.getInstance(this).getItemById(editItemId, existing -> {
+                if (existing != null) {
+                    editTextItemName.setText(existing.getName());
 
-                Category[] categories = Category.values();
-                for (int i = 0; i < categories.length; i++) {
-                    if (categories[i] == existing.getCategory()) {
-                        spinnerCategory.setSelection(i);
-                        iconCategoryPreview.setImageResource(((Category) spinnerCategory.getSelectedItem()).getIconRes());
-                        break;
+                    Category[] categories = Category.values();
+                    for (int i = 0; i < categories.length; i++) {
+                        if (categories[i] == existing.getCategory()) {
+                            spinnerCategory.setSelection(i);
+                            iconCategoryPreview.setImageResource(categories[i].getIconRes());
+                            break;
+                        }
                     }
-                }
 
-                Style[] styles = Style.values();
-                for (int i = 0; i < styles.length; i++) {
-                    if (styles[i] == existing.getStyle()) {
-                        spinnerStyle.setSelection(i);
-                        break;
+                    Style[] styles = Style.values();
+                    for (int i = 0; i < styles.length; i++) {
+                        if (styles[i] == existing.getStyle()) {
+                            spinnerStyle.setSelection(i);
+                            break;
+                        }
                     }
+
+                    selectedColors.addAll(existing.getColors());
+                    selectedSeasons.addAll(existing.getSeasons());
+                    selectedOccasions.addAll(existing.getOccasions());
+
+                    textSelectedSeasons.setText(String.join(", ", selectedSeasons));
+                    textSelectedOccasions.setText(String.join(", ", selectedOccasions));
                 }
-
-                selectedColors.addAll(existing.getColors());
-                selectedSeasons.addAll(existing.getSeasons());
-                selectedOccasions.addAll(existing.getOccasions());
-
-                textSelectedSeasons.setText(String.join(", ", selectedSeasons));
-                textSelectedOccasions.setText(String.join(", ", selectedOccasions));
-            }
+                setupColorPicker(); // must run after selectedColors is populated
+            });
+        } else {
+            setupColorPicker();
         }
-
-        // build color circles (after selectedColors is populated in edit mode)
-        setupColorPicker();
-
         buttonAddSeasons.setOnClickListener(v -> {
             String[] seasonNames = new String[Season.values().length];
             for (int i = 0; i < Season.values().length; i++)
@@ -145,9 +145,10 @@ public class AddItemActivity extends AppCompatActivity {
                     selectedSeasons, selectedOccasions);
 
             if (editItemId != null) {
-                WardrobeRepository.getInstance().updateItem(editItemId, item);
+                item.setId(editItemId); // preserve original ID so @Update finds the row
+                WardrobeRepository.getInstance(this).updateItem(editItemId, item);
             } else {
-                WardrobeRepository.getInstance().addItem(item);
+                WardrobeRepository.getInstance(this).addItem(item);
             }
 
             setResult(RESULT_OK);

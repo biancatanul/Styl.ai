@@ -69,6 +69,12 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
         }
         notifyDataSetChanged();
     }
+    public void updateItems(List<ClothingItem> newItems) {
+        allItems.clear();
+        allItems.addAll(newItems);
+        filteredItems = new ArrayList<>(newItems);
+        notifyDataSetChanged();
+    }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

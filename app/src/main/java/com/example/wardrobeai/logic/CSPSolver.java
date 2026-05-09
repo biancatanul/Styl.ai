@@ -23,27 +23,37 @@ public class CSPSolver {
     }
 
     public List<Outfit> suggestOutfits(Style style, Season season, Occasion occasion, int count) {
-        List<ClothingItem> tops = getItemsForSlot(style, Category.TOP, season, occasion);
-        List<ClothingItem> bottoms = getItemsForSlot(style, Category.BOTTOM, season, occasion);
-        List<ClothingItem> shoes = getItemsForSlot(style, Category.SHOES, season, occasion);
+        List<ClothingItem> tops        = getItemsForSlot(style, Category.TOP, season, occasion);
+        List<ClothingItem> bottoms     = getItemsForSlot(style, Category.BOTTOM, season, occasion);
+        List<ClothingItem> shoes       = getItemsForSlot(style, Category.SHOES, season, occasion);
         List<ClothingItem> accessories = getItemsForSlot(style, Category.ACCESSORY, season, occasion);
+
+        // null sentinel so the accessory loop always runs at least once
+        if (accessories.isEmpty()) accessories.add(null);
+
         List<Outfit> outfits = new ArrayList<>();
 
-        for(ClothingItem top : tops) {
-            for(ClothingItem bottom : bottoms){
-                for(ClothingItem shoe : shoes) {
+        for (ClothingItem top : tops) {
+            for (ClothingItem bottom : bottoms) {
+                for (ClothingItem shoe : shoes) {
                     for (ClothingItem accessory : accessories) {
-                        if (graph.areCompatible(shoe, accessory) && graph.areCompatible(shoe, top) && graph.areCompatible(shoe, bottom) && graph.areCompatible(top, bottom) && graph.areCompatible(top, accessory) && graph.areCompatible(bottom, accessory)) {
-                            List<ClothingItem> outfit = new ArrayList<>();
-                            outfit.add(top);
-                            outfit.add(bottom);
-                            outfit.add(shoe);
-                            outfit.add(accessory);
-                            Outfit newOutfit = new Outfit("AI suggestion " + (outfits.size() + 1), outfit, true);
-                            outfits.add(newOutfit);
-                            if (outfits.size() == count) {
-                                return outfits;
-                            }
+                        boolean compatible = graph.areCompatible(shoe, top)
+                                && graph.areCompatible(shoe, bottom)
+                                && graph.areCompatible(top, bottom);
+                        if (accessory != null) {
+                            compatible = compatible
+                                    && graph.areCompatible(top, accessory)
+                                    && graph.areCompatible(bottom, accessory)
+                                    && graph.areCompatible(shoe, accessory);
+                        }
+                        if (compatible) {
+                            List<ClothingItem> chosen = new ArrayList<>();
+                            chosen.add(top);
+                            chosen.add(bottom);
+                            chosen.add(shoe);
+                            if (accessory != null) chosen.add(accessory);
+                            outfits.add(new Outfit("AI suggestion " + (outfits.size() + 1), chosen, true));
+                            if (outfits.size() == count) return outfits;
                         }
                     }
                 }

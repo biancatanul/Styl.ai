@@ -12,6 +12,7 @@ import com.example.wardrobeai.data.*;
 import com.example.wardrobeai.logic.*;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DataStructuresActivity extends AppCompatActivity {
@@ -24,6 +25,8 @@ public class DataStructuresActivity extends AppCompatActivity {
     private RedBlackTree rbt;
     private BinomialHeap heap;
     private CompatibilityGraph graph;
+    private List<ClothingItem> cachedItems = new ArrayList<>();
+    private boolean structuresReady = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,34 +87,41 @@ public class DataStructuresActivity extends AppCompatActivity {
     }
 
     private void buildStructures() {
-        WardrobeRepository repo = WardrobeRepository.getInstance();
-        List<ClothingItem> items = repo.getAllItems();
+        WardrobeRepository repo = WardrobeRepository.getInstance(this);
+        repo.buildCompatibilityGraph(g -> {
+            graph = g;
+            repo.getAllItems(items -> {
+                cachedItems = items;
 
-        rbt = new RedBlackTree();
-        for (ClothingItem item : items) rbt.insert(item);
+                rbt = new RedBlackTree();
+                for (ClothingItem item : items) rbt.insert(item);
 
-        graph = repo.buildCompatibilityGraph();
+                CSPSolver csp = new CSPSolver(items, graph);
+                heap = new BinomialHeap();
+                int total = 0;
 
-        CSPSolver csp = new CSPSolver(items, graph);
-        heap = new BinomialHeap();
-        int total = 0;
-
-        outer:
-        for (Style style : Style.values()) {
-            for (Season season : Season.values()) {
-                for (Occasion occasion : Occasion.values()) {
-                    List<Outfit> outfits = csp.suggestOutfits(style, season, occasion, 2);
-                    for (Outfit outfit : outfits) {
-                        heap.insert(outfit, BinomialHeap.scoreOutfit(outfit, graph));
-                        total++;
-                        if (total >= 20) break outer;
+                outer:
+                for (Style style : Style.values()) {
+                    for (Season season : Season.values()) {
+                        for (Occasion occasion : Occasion.values()) {
+                            List<Outfit> outfits = csp.suggestOutfits(style, season, occasion, 2);
+                            for (Outfit outfit : outfits) {
+                                heap.insert(outfit, BinomialHeap.scoreOutfit(outfit, graph));
+                                if (++total >= 20) break outer;
+                            }
+                        }
                     }
                 }
-            }
-        }
+
+                structuresReady = true;
+                Spinner spinner = findViewById(R.id.spinnerStructure);
+                showView(spinner.getSelectedItemPosition());
+            });
+        });
     }
 
     private void showView(int position) {
+        if (!structuresReady) return;
         container.removeAllViews();
         nodeDetailPanel.setVisibility(View.GONE);
         switch (position) {
@@ -128,8 +138,7 @@ public class DataStructuresActivity extends AppCompatActivity {
                 break;
             }
             case 2: {
-                CompatibilityGraphView view = new CompatibilityGraphView(this,
-                        WardrobeRepository.getInstance().getAllItems(), graph);
+                CompatibilityGraphView view = new CompatibilityGraphView(this, cachedItems, graph);
                 view.setOnNodeTappedListener((title, details) -> showPanel(title, details));
                 container.addView(view);
                 break;
