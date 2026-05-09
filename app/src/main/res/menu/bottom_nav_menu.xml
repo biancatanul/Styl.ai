@@ -2,18 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_wardrobe"
-        android:icon="@android:drawable/ic_menu_gallery"
+        android:icon="@drawable/dresser"
         android:title="Wardrobe" />
     <item
         android:id="@+id/nav_outfits"
-        android:icon="@android:drawable/ic_menu_slideshow"
+        android:icon="@drawable/coat_hanger"
         android:title="Outfits" />
     <item
         android:id="@+id/nav_ai"
-        android:icon="@android:drawable/ic_dialog_info"
+        android:icon="@drawable/sparkle"
         android:title="AI Suggest" />
     <item
         android:id="@+id/nav_data"
-        android:icon="@android:drawable/ic_menu_manage"
+        android:icon="@drawable/graph"
         android:title="Data" />
 </menu>

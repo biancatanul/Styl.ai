@@ -426,10 +426,19 @@ public class RedBlackTreeView extends View {
         canvas.drawCircle(pos[0], pos[1], r, nodePaint);
 
         if (animProgress > 0.5f && photo == null) {
+            android.graphics.drawable.Drawable icon = androidx.core.content.ContextCompat
+                    .getDrawable(getContext(), node.item.getCategory().getIconRes());
+            if (icon != null) {
+                int half = (int)(18 * animProgress);
+                icon.setBounds((int)pos[0] - half, (int)pos[1] - half - 14,
+                        (int)pos[0] + half, (int)pos[1] + half - 14);
+                icon.setTint(Color.WHITE);
+                icon.draw(canvas);
+            }
             textPaint.setColor(Color.WHITE);
             String name = node.item.getName();
             if (name.length() > 8) name = name.substring(0, 7) + "…";
-            canvas.drawText(name, pos[0], pos[1] + 8f, textPaint);
+            canvas.drawText(name, pos[0], pos[1] + 34f, textPaint);
         }
     }
 

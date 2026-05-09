@@ -25,7 +25,12 @@
                 android:id="@+id/colorBlock"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
-
+            <ImageView
+                android:id="@+id/iconCategory"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"/>
             <TextView
                 android:id="@+id/textCategory"
                 android:layout_width="wrap_content"

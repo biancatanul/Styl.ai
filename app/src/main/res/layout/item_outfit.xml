@@ -14,57 +14,66 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp">
 
+        <!-- Name row -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="10dp">
 
             <TextView
                 android:id="@+id/textOutfitName"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
+                android:layout_weight="1"
+                android:textSize="15sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_dark"/>
 
             <TextView
-                android:id="@+id/textOutfitItems"
+                android:id="@+id/textAITag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginTop="3dp"/>
+                android:text="AI"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:background="@drawable/bg_pill_teal"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone"/>
+
+            <ImageButton
+                android:id="@+id/buttonOutfitMenu"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@android:drawable/ic_menu_more"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/text_hint"
+                android:contentDescription="More options"/>
 
         </LinearLayout>
 
-        <!-- AI badge — visibility toggled in OutfitAdapter -->
-        <TextView
-            android:id="@+id/textAITag"
-            android:layout_width="wrap_content"
+        <!-- Item tiles -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="AI"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_dark"
-            android:background="@drawable/bg_pill_teal"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="4dp"
-            android:layout_marginEnd="8dp"
-            android:visibility="gone"/>
+            android:scrollbars="none">
 
-        <ImageButton
-            android:id="@+id/buttonOutfitMenu"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:src="@android:drawable/ic_menu_more"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:tint="@color/text_hint"
-            android:contentDescription="More options"/>
+            <LinearLayout
+                android:id="@+id/itemTilesContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"/>
+
+        </HorizontalScrollView>
 
     </LinearLayout>
 

@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -93,6 +94,17 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
         } else {
             holder.colorBlock.setBackgroundColor(Color.LTGRAY);
         }
+        holder.iconCategory.setImageResource(item.getCategory().getIconRes());
+
+        // tint icon to contrast with background color
+        int bgColor = item.getColors().isEmpty() ? android.graphics.Color.LTGRAY
+                : android.graphics.Color.parseColor(item.getColors().get(0));
+        double lum = (0.299 * android.graphics.Color.red(bgColor)
+                + 0.587 * android.graphics.Color.green(bgColor)
+                + 0.114 * android.graphics.Color.blue(bgColor)) / 255.0;
+        holder.iconCategory.setColorFilter(lum > 0.5
+                ? android.graphics.Color.BLACK
+                : android.graphics.Color.WHITE);
 
         // Circular color swatches at the bottom
         holder.colorSwatchContainer.removeAllViews();
@@ -152,9 +164,11 @@ public class WardrobeAdapter extends RecyclerView.Adapter<WardrobeAdapter.ViewHo
         LinearLayout colorSwatchContainer;
         ImageButton buttonMenu;
         View colorBlock;
+        ImageView iconCategory;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            iconCategory = itemView.findViewById(R.id.iconCategory);
             textName = itemView.findViewById(R.id.textItemName);
             textCategory = itemView.findViewById(R.id.textCategory);
             colorSwatchContainer = itemView.findViewById(R.id.colorSwatchContainer);

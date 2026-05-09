@@ -22,6 +22,7 @@ public class AddItemActivity extends AppCompatActivity {
 
     private String editItemId = null;
     private GridLayout colorGrid;
+    private ImageView iconCategoryPreview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,17 @@ public class AddItemActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_item, Category.values());
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCategory.setAdapter(categoryAdapter);
+        iconCategoryPreview = findViewById(R.id.iconCategoryPreview);
+
+        spinnerCategory.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                Category selected = (Category) spinnerCategory.getSelectedItem();
+                iconCategoryPreview.setImageResource(selected.getIconRes());
+            }
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+        });
 
         ArrayAdapter<Style> styleAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, Style.values());
@@ -59,6 +71,7 @@ public class AddItemActivity extends AppCompatActivity {
                 for (int i = 0; i < categories.length; i++) {
                     if (categories[i] == existing.getCategory()) {
                         spinnerCategory.setSelection(i);
+                        iconCategoryPreview.setImageResource(((Category) spinnerCategory.getSelectedItem()).getIconRes());
                         break;
                     }
                 }
