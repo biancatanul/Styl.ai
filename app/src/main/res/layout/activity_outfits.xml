@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:text="Saved Looks"
             android:textSize="26sp"
-            android:textStyle="bold"
+            android:fontFamily="@font/dynapuff"
             android:textColor="@color/text_dark"/>
 
     </LinearLayout>

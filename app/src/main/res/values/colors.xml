@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="pink_bg">#FFD6DD</color>
+    <color name="pink_bg">#FFE6F3</color>
     <color name="surface_white">#FFFFFF</color>
-    <color name="teal">#7AB3B8</color>
-    <color name="teal_dark">#5A9096</color>
+    <color name="teal">#85BCC1</color>
+    <color name="teal_dark">#145B62</color>
     <color name="teal_light">#C4DEE0</color>
     <color name="teal_ultra_light">#EAF4F5</color>
-    <color name="yellow">#FFD23F</color>
+    <color name="grey">#8E6F7E</color>
     <color name="yellow_light">#FFF3C4</color>
     <color name="text_dark">#1F271B</color>
-    <color name="text_secondary">#6B7B7D</color>
+    <color name="text_secondary">#31242B</color>
     <color name="text_hint">#A8B8BA</color>
     <color name="divider">#E8C8CC</color>
     <color name="card_border">#F0D8DC</color>
-    <color name="nav_bar">#FFFAFB</color>
+    <color name="nav_bar">#DEB0C4</color>
 </resources>

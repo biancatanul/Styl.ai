@@ -23,6 +23,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Build Outfit"
+                android:fontFamily="@font/dynapuff"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_dark"/>
@@ -41,6 +42,7 @@
                 android:layout_height="wrap_content"
                 android:text="OUTFIT NAME"
                 android:textSize="11sp"
+                android:fontFamily="@font/elms_sans"
                 android:textStyle="bold"
                 android:textColor="@color/text_secondary"
                 android:letterSpacing="0.08"
@@ -92,6 +94,7 @@
                         android:layout_height="wrap_content"
                         android:text="SELECTED ITEMS"
                         android:textSize="11sp"
+                        android:fontFamily="@font/elms_sans"
                         android:textStyle="bold"
                         android:textColor="@color/text_secondary"
                         android:letterSpacing="0.08"
@@ -104,6 +107,7 @@
                         android:textSize="14sp"
                         android:textColor="@color/text_secondary"
                         android:minHeight="40dp"
+                        android:fontFamily="@font/elms_sans"
                         android:hint="No items selected yet"
                         android:textColorHint="@color/text_hint"
                         android:layout_marginBottom="16dp"/>

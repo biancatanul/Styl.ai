@@ -51,7 +51,7 @@
             android:textSize="11sp"
             android:textStyle="bold"
             android:textColor="@color/text_dark"
-            android:background="@drawable/bg_pill_yellow"
+            android:background="@drawable/bg_pill_teal"
             android:paddingHorizontal="10dp"
             android:paddingVertical="4dp"
             android:layout_marginEnd="8dp"

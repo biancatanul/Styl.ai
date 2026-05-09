@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.*;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.example.wardrobeai.R;
 import com.example.wardrobeai.data.*;
@@ -126,6 +127,7 @@ public class AiActivity extends AppCompatActivity {
         itemsLayout.removeAllViews();
         for (ClothingItem item : suggestions.get(currentIndex).getItems()) {
             TextView tv = new TextView(this);
+            tv.setTypeface(ResourcesCompat.getFont(this, R.font.elms_sans));
             tv.setText(item.getName() + "\n" + generateReasoning(item));
             tv.setPadding(0, 12, 0, 12);
             tv.setTextColor(getColor(R.color.text_dark));

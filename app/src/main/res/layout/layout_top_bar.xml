@@ -10,9 +10,9 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/cherry_bomb_one"
         android:text="styl.AI"
         android:textSize="24sp"
-        android:textStyle="bold|italic"
         android:textColor="@color/text_dark"
         android:paddingHorizontal="20dp"
         android:paddingTop="16dp"

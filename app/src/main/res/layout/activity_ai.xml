@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:text="Style me for..."
                 android:textSize="24sp"
-                android:textStyle="bold"
+                android:fontFamily="@font/dynapuff"
                 android:textColor="@color/text_dark"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -82,8 +82,8 @@
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
-                        <TextView android:id="@+id/suggestionIndexText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Suggestion 1 of 3" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/text_dark"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="AI" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/text_dark" android:background="@drawable/bg_pill_yellow" android:paddingHorizontal="12dp" android:paddingVertical="5dp"/>
+                        <TextView android:id="@+id/suggestionIndexText" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Suggestion 1 of 3" android:textSize="18sp" android:fontFamily="@font/dynapuff" android:textColor="@color/text_dark"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="AI" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/text_dark" android:background="@drawable/bg_pill_teal" android:paddingHorizontal="12dp" android:paddingVertical="5dp"/>
                     </LinearLayout>
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Based on your selections" android:textSize="13sp" android:textColor="@color/teal" android:layout_marginBottom="16dp"/>

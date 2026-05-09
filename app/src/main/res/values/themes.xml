@@ -5,9 +5,9 @@
         <item name="colorOnPrimary">@color/surface_white</item>
         <item name="colorPrimaryContainer">@color/teal_light</item>
         <item name="colorOnPrimaryContainer">@color/teal_dark</item>
-        <item name="colorSecondary">@color/yellow</item>
+        <item name="colorSecondary">@color/grey</item>
         <item name="colorOnSecondary">@color/text_dark</item>
-        <item name="colorSecondaryContainer">@color/yellow</item>
+        <item name="colorSecondaryContainer">@color/grey</item>
         <item name="colorTertiary">@color/teal_dark</item>
         <item name="android:colorBackground">@color/pink_bg</item>
         <item name="colorSurface">@color/surface_white</item>
@@ -16,6 +16,7 @@
         <item name="colorOutline">@color/divider</item>
         <item name="android:statusBarColor">@color/pink_bg</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+        <item name="android:fontFamily">@font/elms_sans</item>
     </style>
 
     <style name="Theme.WardrobeAi" parent="Base.Theme.WardrobeAi" />

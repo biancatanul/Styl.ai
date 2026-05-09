@@ -99,6 +99,7 @@ public class WardrobeActivity extends AppCompatActivity {
 
         com.google.android.material.chip.Chip allChip = new com.google.android.material.chip.Chip(this);
         allChip.setText("ALL ITEMS");
+        allChip.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.elms_sans));
         allChip.setCheckable(true);
         allChip.setChecked(true);
         chipGroup.addView(allChip);
@@ -106,6 +107,7 @@ public class WardrobeActivity extends AppCompatActivity {
         for (Occasion occasion : Occasion.values()) {
             com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(this);
             chip.setText(occasion.name());
+            chip.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.elms_sans));
             chip.setCheckable(true);
             chipGroup.addView(chip);
         }

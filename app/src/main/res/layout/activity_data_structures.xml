@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:text="Data Structures"
             android:textSize="22sp"
-            android:textStyle="bold"
+            android:fontFamily="@font/dynapuff"
             android:textColor="@color/text_dark"/>
 
     </LinearLayout>
@@ -91,7 +91,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textSize="16sp"
-                android:textStyle="bold"
+                android:fontFamily="@font/dynapuff"
                 android:textColor="@color/text_dark"/>
 
             <TextView
@@ -100,7 +100,6 @@
                 android:layout_height="wrap_content"
                 android:text="X"
                 android:textSize="16sp"
-                android:textStyle="bold"
                 android:textColor="@color/text_secondary"
                 android:padding="8dp"/>
 
