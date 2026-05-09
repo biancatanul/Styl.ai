@@ -27,6 +27,10 @@ public class DataStructuresActivity extends AppCompatActivity {
     private CompatibilityGraph graph;
     private List<ClothingItem> cachedItems = new ArrayList<>();
     private boolean structuresReady = false;
+    private RedBlackTreeView rbtView = null;
+    private LinearLayout rbtStepControls;
+    private TextView textStepInfo;
+    private Button btnStepBack, btnStepForward;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +41,23 @@ public class DataStructuresActivity extends AppCompatActivity {
         nodeDetailPanel = findViewById(R.id.nodeDetailPanel);
         nodeDetailTitle = findViewById(R.id.nodeDetailTitle);
         nodeDetailBody = findViewById(R.id.nodeDetailBody);
+        rbtStepControls = findViewById(R.id.rbtStepControls);
+        textStepInfo    = findViewById(R.id.textStepInfo);
+        btnStepBack     = findViewById(R.id.btnStepBack);
+        btnStepForward  = findViewById(R.id.btnStepForward);
+
+        btnStepBack.setOnClickListener(v -> {
+            if (rbtView != null) {
+                rbtView.stepBackward();
+                updateStepControls();
+            }
+        });
+        btnStepForward.setOnClickListener(v -> {
+            if (rbtView != null) {
+                rbtView.stepForward();
+                updateStepControls();
+            }
+        });
 
         findViewById(R.id.nodeDetailDismiss).setOnClickListener(v -> {
             nodeDetailPanel.setVisibility(View.GONE);
@@ -73,7 +94,12 @@ public class DataStructuresActivity extends AppCompatActivity {
         if (v instanceof BinomialHeapView) ((BinomialHeapView) v).clearSelection();
         if (v instanceof CompatibilityGraphView) ((CompatibilityGraphView) v).clearSelection();
     }
-
+    private void updateStepControls() {
+        if (rbtView == null) return;
+        textStepInfo.setText(rbtView.getStepLabel());
+        btnStepBack.setEnabled(rbtView.canStepBackward());
+        btnStepForward.setEnabled(rbtView.canStepForward());
+    }
     private void showPanel(String title, String details) {
         nodeDetailTitle.setText(title);
         nodeDetailBody.setText(details);
@@ -124,20 +150,26 @@ public class DataStructuresActivity extends AppCompatActivity {
         if (!structuresReady) return;
         container.removeAllViews();
         nodeDetailPanel.setVisibility(View.GONE);
+        rbtView = null;
+
         switch (position) {
             case 0: {
-                RedBlackTreeView view = new RedBlackTreeView(this, rbt);
-                view.setOnNodeTappedListener((title, details) -> showPanel(title, details));
-                container.addView(view);
+                rbtView = new RedBlackTreeView(this, rbt);
+                rbtView.setOnNodeTappedListener((title, details) -> showPanel(title, details));
+                container.addView(rbtView);
+                rbtStepControls.setVisibility(View.VISIBLE);
+                updateStepControls();
                 break;
             }
             case 1: {
+                rbtStepControls.setVisibility(View.GONE);
                 BinomialHeapView view = new BinomialHeapView(this, heap);
                 view.setOnNodeTappedListener((title, details) -> showPanel(title, details));
                 container.addView(view);
                 break;
             }
             case 2: {
+                rbtStepControls.setVisibility(View.GONE);
                 CompatibilityGraphView view = new CompatibilityGraphView(this, cachedItems, graph);
                 view.setOnNodeTappedListener((title, details) -> showPanel(title, details));
                 container.addView(view);

@@ -65,6 +65,42 @@
             android:layout_height="match_parent"/>
 
     </FrameLayout>
+    <LinearLayout
+        android:id="@+id/rbtStepControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="8dp"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btnStepBack"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="← Prev"
+            android:textSize="13sp"
+            android:background="@drawable/bg_button_teal"/>
+
+        <TextView
+            android:id="@+id/textStepInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"/>
+
+        <Button
+            android:id="@+id/btnStepForward"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Next →"
+            android:textSize="13sp"
+            android:background="@drawable/bg_button_teal"/>
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/nodeDetailPanel"

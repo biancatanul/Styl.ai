@@ -38,7 +38,10 @@ public class RedBlackTreeView extends View {
         this.listener = l;
     }
 
-    private final RedBlackTree.VisNode root;
+    private RedBlackTree.VisNode root;
+    private final List<RedBlackTree.VisNode> snapshots;
+    private final List<String> insertionOrder;
+    private int snapshotIndex;
     private final Paint nodePaint     = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint edgePaint     = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint textPaint     = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -92,7 +95,10 @@ public class RedBlackTreeView extends View {
 
     public RedBlackTreeView(Context context, RedBlackTree rbt) {
         super(context);
-        this.root = rbt.getVisTree();
+        this.snapshots      = rbt.getInsertionSnapshots();
+        this.insertionOrder = rbt.getInsertionOrder();
+        this.snapshotIndex  = snapshots.isEmpty() ? -1 : snapshots.size() - 1;
+        this.root           = snapshots.isEmpty() ? null : snapshots.get(snapshotIndex);
 
         edgePaint.setColor(Color.GRAY);
         edgePaint.setStrokeWidth(4f);
@@ -461,5 +467,45 @@ public class RedBlackTreeView extends View {
         canvas.clipPath(clip);
         canvas.drawBitmap(bmp, src, new RectF(cx - r, cy - r, cx + r, cy + r), null);
         canvas.restore();
+    }
+    public boolean canStepForward()  { return snapshotIndex < snapshots.size() - 1; }
+    public boolean canStepBackward() { return snapshotIndex > 0; }
+
+    public void stepForward() {
+        if (!canStepForward()) return;
+        snapshotIndex++;
+        root = snapshots.get(snapshotIndex);
+        refreshLayout();
+    }
+
+    public void stepBackward() {
+        if (!canStepBackward()) return;
+        snapshotIndex--;
+        root = snapshots.get(snapshotIndex);
+        refreshLayout();
+    }
+
+    public String getStepLabel() {
+        if (snapshots.isEmpty()) return "No items";
+        String name = snapshotIndex < insertionOrder.size()
+                ? insertionOrder.get(snapshotIndex) : "?";
+        return "Step " + (snapshotIndex + 1) + " of " + snapshots.size() + " — " + name;
+    }
+
+    private void refreshLayout() {
+        positions.clear();
+        inorderIndex = 0;
+        if (root != null) {
+            assignPositions(root, 0);
+            float minX = Float.MAX_VALUE, maxX = -Float.MAX_VALUE;
+            for (float[] pos : positions.values()) {
+                minX = Math.min(minX, pos[0]);
+                maxX = Math.max(maxX, pos[0]);
+            }
+            float offsetX = (getWidth() - (maxX - minX)) / 2f - minX;
+            matrix.reset();
+            matrix.postTranslate(offsetX, NODE_RADIUS + 20);
+        }
+        invalidate();
     }
 }

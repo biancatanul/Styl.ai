@@ -9,7 +9,8 @@ public class RedBlackTree {
 
     private static final boolean RED = true;
     private static final boolean BLACK = false;
-
+    private final List<VisNode> insertionSnapshots = new ArrayList<>();
+    private final List<String> insertionOrder = new ArrayList<>();
     private class Node {
         ClothingItem item;
         Node left, right, parent;
@@ -88,8 +89,12 @@ public class RedBlackTree {
         z.right = NIL;
         z.color = RED;
         insertFixup(z);
-    }
 
+        insertionSnapshots.add(getVisTree());
+        insertionOrder.add(item.getName());
+    }
+    public List<VisNode> getInsertionSnapshots() { return insertionSnapshots; }
+    public List<String> getInsertionOrder() { return insertionOrder; }
     private void insertFixup(Node z) {
         while (z.parent.color == RED) {
             if (z.parent == z.parent.parent.left) {
